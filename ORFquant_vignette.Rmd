@@ -1,0 +1,234 @@
+---
+title: "ORFquant vignette"
+author: "Lorenzo Calviello"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output:
+  html_document: 
+    toc: true
+    toc_float:
+      collapsed: false
+    toc_depth: 2
+---
+
+```{r setup_vig, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+ORFquant is an R package that detects and quantifies ORF translation using Ribo-seq [1] data. This package uses syntax and functions present in *Bioconductor* packages like *GenomicFeatures*, *rtracklayer* or *BSgenome*.
+This vignette illustrates the usage of the package using example data and annotation.
+
+**Warning**: While we encourage users to get familiar with each outlined step, executing all the code on your machine will generate a lot of data (~550 Mb) and it might take some time (5-10 minutes for each analysis and report creation). Please make sure to have enough disk space if you decide to execute code from all the sections.
+
+As a first step, let's load the package:
+
+```{r load_lib}
+suppressPackageStartupMessages(library("ORFquant"))
+```
+
+
+## Exploring the annotation
+
+As in the *Ribo-seQC* package [2] (https://github.com/lcalviell/Ribo-seQC), we use a .gtf file and a .2bit file to create a comprehensive list of annotated transcript and genomic features. Let's now download annotation for *Homo sapiens*: a subset of the GENCODE 25 annotation (https://www.gencodegenes.org/human/release_25.html) and the corresponding genome sequences.
+
+```{r create_dirs_hum}
+download.file("https://drive.google.com/uc?export=download&id=1n6UA5cSz6djx0dY_7sI57177T-kyZhhT",destfile = "test_human.2bit")
+download.file("https://drive.google.com/uc?export=download&id=19Am9-iMEyB-AcIsVRdIqrF-BVdQYrcaI",destfile = "test_human.gtf")
+```
+
+
+To parse the rich information present in our *.gtf* file we use the *prepare_annotation_files* function. Such a function creates a *TxDb*  and a compressed *Rdata* file containing several regions of interest and additional information.
+Moreover, such function reads a genome file in *.2bit* to forge a *BSgenome* package for fast and efficient query of genomic sequences. A *.2bit* file can be obtained from a *.fasta* file using the *faToTwoBit* software from UCSC: https://genome.ucsc.edu/goldenpath/help/twoBit.html - http://hgdownload.soe.ucsc.edu/admin/exe/ )
+
+
+
+
+```{r create_annot_hum}
+prepare_annotation_files(annotation_directory = ".",
+                         twobit_file = "test_human.2bit",
+                         gtf_file = "test_human.gtf",scientific_name = "Human.test",
+                         annotation_name = "genc25_22M",export_bed_tables_TxDb = F,forge_BSgenome = T,create_TxDb = T)
+```
+
+
+We can now read such information using the *load_annotation* function:
+
+```{r load_hum}
+load_annotation("test_human.gtf_Rannot")
+```
+
+Two objects have now been created: a *genome_seq* object links to the *BSgenome* package we just created and loaded (containing genome sequences), and a *GTF_annotation* object containing important information present in our *.gtf* file.
+For instance, we can access genomic sequences using commands as:
+
+```{r gen_hum}
+genome_seq[["chr22"]]
+genome_seq[["chrM"]]
+```
+
+Transcript annotation and CDS annotations can be accessed as follows:
+
+```{r gtf_hum_general_1}
+GTF_annotation$exons_txs
+```
+
+```{r gtf_hum_general_2}
+GTF_annotation$cds_txs
+```
+
+
+The genomic sequences corresponding to such genomic regions can be easily extracted:
+
+```{r gen_hum_cds}
+getSeq(genome_seq,GTF_annotation$cds_txs[[4]])
+```
+
+A list of annotated start and stop codons, including the transcripts they map to, can be accessed using:
+
+```{r gtf_hum_general_3}
+GTF_annotation$start_stop_codons
+```
+
+CDS annotation in transcript-level coordinates is also reported:
+
+```{r gtf_hum_general_4}
+GTF_annotation$cds_txs_coords
+```
+
+A list of gene ids, transcript ids, together with their symbols and biotypes, can be accessed with:
+
+```{r gtf_hum_general_5}
+GTF_annotation$trann
+```
+
+The genetic codes used for each chromosomes are accessed using:
+
+```{r gtf_hum_general_6}
+GTF_annotation$genetic_codes
+getGeneticCode(GTF_annotation$genetic_codes["chr22","genetic_code"])
+getGeneticCode(GTF_annotation$genetic_codes["chrM","genetic_code"])
+```
+
+Annotation and genome sequences are linked together in the annotation creation step.
+The BSgenome package corresponding to the .gtf file used is reported in the *GTF_annotation* object:
+
+```{r gtf_hum_general_7}
+GTF_annotation$genome_package
+```
+
+
+## Prepare input files (human)
+
+Let's now download a subset of a Ribo-seq dataset in HEK293 cells [3].
+
+
+```{r prepare_1}
+download.file("https://drive.google.com/uc?export=download&id=11PP5y2QH7si81rbEBJsOB-Lt3l_JowRW",destfile = "test_human_hek.bam")
+```
+
+There are two ways to prepare the input file for *ORFquant*: the recommended one is to use *Ribo-seQC* [2], which automatically output a "*for_ORFquant" file together with many other statistics about the alignment.
+
+As an alternative, we can use the *prepare_for_ORFquant* function, supplied with the bam file together with a text file specifying read lengths and cutoffs to use (as well as information about their possible organelle of origin [2]):
+
+```{r prepare2}
+download.file("https://drive.google.com/uc?export=download&id=1cszfwJKiTeQMK-G4_R5KOt8rWoFrV-R_",destfile ="instructions_hektest.txt")
+prepare_for_ORFquant(annotation_file = "test_human.gtf_Rannot",bam_file = "test_human_hek.bam",path_to_rl_cutoff_file = "instructions_hektest.txt")
+```
+
+Additionally, users can input their custom P_sites track using other options in the *prepare_for_ORFquant* function.
+
+## Run ORFquant
+
+We can now run ORFquant using the annotation and the *for_ORFquant* file we created.
+ORFquant can be run on a specific list of genes, or (**recommended!**) on the entire set of possible transcripts. We strongly recommend running ORFquant on the entire transcriptome, to check the overall validity of its results (see next section).
+
+**NOTE:** We recommend to run ORFquant on an HPC cluster. On average, using 7 cores with 10G of RAM per core will take ~12 hours to run the pipeline on the entire transcriptome.
+
+```{r run_1}
+run_ORFquant(for_ORFquant_file = "test_human_hek.bam_for_ORFquant",
+           annotation_file = "test_human.gtf_Rannot",n_cores = 1,gene_name =c("MIEF1","DRG2"))
+```
+
+This will produce different files, such as annotation in .gtf format for the *de-novo* identified ORFs or protein sequences in .fasta format.
+For a more detailed list of output files, please check:
+
+```{r run_help1}
+?run_ORFquant
+```
+
+Additionally, an object called *ORFquant_results* (corresponding to the *final_ORFquant_results* file, use the *load* function to import it) should be now available in your environment:
+
+```{r run_2}
+names(ORFquant_results)
+```
+
+Such an object is a *list* containing comprehensive statistics on the set of identified ORFs.
+For example:
+
+```{r run_3}
+ORFquant_results$ORFs_tx
+```
+
+will show transcript positions and and other statistics about the quantification of translation on each of the identified ORFs, while: 
+
+```{r run_4}
+ORFquant_results$ORFs_gen
+```
+will show genomic regions corresponding to the identified ORFs.
+
+
+The list of selected transcripts can be accessed using:
+```{r run_5}
+ORFquant_results$selected_txs
+```
+
+A more detailed list of all the output objects and content is available running:
+
+```{r run_help2}
+?ORFquant
+?run_ORFquant
+```
+
+
+## Create a summary html report
+
+Summary plots can be obtained from the full (run on the entire transcriptome) ORFquant output.
+Let's download ORFquant output and the for_ORFquant object for the entire HEK293 dataset [3].
+
+```{r summary1}
+download.file("https://drive.google.com/uc?export=download&id=1BTIWhNMC_d_iGciobjbwqrjJV5x2JzAp",destfile = "HEK293_final_ORFquant_results")
+download.file("https://drive.google.com/uc?export=download&id=1xKV_oQbC_8FIK9vepldZtiBXzofI56zi",destfile = "HEK293_for_ORFquant")
+```
+
+we can create summary plots (showing number of detected ORFs for different gene biotypes, statistics on ORF quantifications etc..) in *.pdf* format using:
+
+```{r summary2}
+plot_ORFquant_results(for_ORFquant_file = "HEK293_for_ORFquant",ORFquant_output_file = "HEK293_final_ORFquant_results",
+                        annotation_file = "test_human.gtf_Rannot")
+```
+
+An *RData* object (*_ORFquant_plots_RData*) containing all the information to reproduce the plots is also created.
+Additionally, the plots can be embedded in a html report (with the possibility of including results from different *ORFquant* runs) using:
+
+```{r summary3}
+create_ORFquant_html_report(input_files = "HEK293_final_ORFquant_results_plots/HEK293_ORFquant_plots_RData",input_sample_names = "HEK2932_riboseq", output_file= "HEK293_ORFquant_report.html")
+```
+
+The html report can be opened by different browsers such as Firefox or Chrome.
+
+## References
+
+1) Ingolia, N.T. et al. (2009) Genome-wide analysis in vivo of resolution using ribosome profiling. Science 324, 218–223
+
+2) Calviello, L. & Sydow, D. et al. (2019) Ribo-seQC: comprehensive analysis of cytoplasmic and organellar ribosome profiling data. bioRxiv
+
+3) Calviello, L. et al. (2015) Detecting actively translated open reading frames in ribosome profiling data. Nat. Methods 13, 1–9
+
+
+
+## Session info
+
+```{r end_sessinf}
+session_info()
+```
+
