@@ -1,0 +1,243 @@
+---
+title: "ORFquant html report"
+author: "Generated with ORFquant"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+params:
+  input_files: ""
+  input_sample_names: ""
+  output_fig_path: ""
+output:
+  html_document: 
+    toc: true
+    toc_float:
+      collapsed: false
+    toc_depth: 2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ORFquant)
+library(knitr) 
+library(ggplot2) # plotting
+library(reshape2) # data formatting for ggplot2
+library(gridExtra) # multiple plots per figure
+```
+
+```{r data, echo=FALSE, warning=FALSE}
+# get input from params
+input_files <- params$input_files # RData file paths to one or more samples (one RData file per sample)
+input_sample_names <- params$input_sample_names # user-defined sample names to be displayed in report (short(!) names)
+names(input_files) <- input_sample_names
+rdata_list<-list()
+for(samplo in names(input_files)){
+    rdata_list[[samplo]]<-get(load(input_files[[samplo]]))
+}
+
+
+```
+
+
+# Data information
+
+Sample names and data file paths visualized in this report:
+
+```{r data_info, echo=FALSE, warning=FALSE, message=FALSE, results="asis", fig.width=10, dpi=150}
+cat("\n\n")
+for (i in 1:length(input_files)){
+    cat("**", names(input_files[i]), "**: \n", sep="")
+    cat(input_files[i], "\n\n\n")
+}
+cat("\n\n")
+```
+
+
+# 1 Transcript selection
+
+As a first step in the *ORFquant* pipeline, Ribo-seq data on exonic bins and splice junctions is used to filter a subset of transcripts which can explain all the regions with signal, trying to minimize the number of transcripts with "empty" regions.\
+
+
+In this section we can visualize the results from the filtering step.
+
+## 1.1 Number of selected transcript per gene {.tabset}
+```{r sel_1, echo=FALSE, warning=FALSE, message=FALSE, results="asis", fig.width=10, dpi=150}
+# plot barplot for each sample in separate tabs
+for (i in c(1:length(rdata_list))){
+    cat("### ", names(rdata_list)[i], " {.tabset} \n \n")
+    print(rdata_list[[i]][["Sel_txs_genes"]])
+    cat("\n\n")
+}
+```
+
+## 1.2 Number of selected transcripts per gene (against Ribo-seq TPM) {.tabset}
+
+```{r sel_2, echo=FALSE, warning=FALSE, message=FALSE, results="asis", fig.width=10, dpi=150}
+# plot barplot for each sample in separate tabs
+for (i in c(1:length(rdata_list))){
+    cat("### ", names(rdata_list)[i], " {.tabset} \n \n")
+    print(rdata_list[[i]][["Sel_txs_genes_tpm"]])
+    cat("\n\n")
+}
+```
+
+## 1.3 % of selected transcripts per gene {.tabset}
+
+```{r sel_3, echo=FALSE, warning=FALSE, message=FALSE, results="asis", fig.width=10, dpi=150}
+# plot barplot for each sample in separate tabs
+for (i in c(1:length(rdata_list))){
+    cat("### ", names(rdata_list)[i], " {.tabset} \n \n")
+    print(rdata_list[[i]][["Sel_txs_genes_pct"]])
+    cat("\n\n")
+}
+```
+
+## 1.4 Improvement on transcript-specific mapping {.tabset}
+
+Results are shown using all annotated transcripts, transcripts annotated as protein-coding, and selected transcripts.
+A covered features is a features with at least 1 P-site (or spliced read) mapping to it. 1 means uniquely mapping to a transcript, while 0 means mapping to none.
+
+```{r sel_4, echo=FALSE, warning=FALSE, message=FALSE, results="asis", fig.height=8,fig.width=10, dpi=150}
+# plot barplot for each sample in separate tabs
+for (i in c(1:length(rdata_list))){
+    cat("### ", names(rdata_list)[i], " {.tabset} \n \n")
+    print(rdata_list[[i]][["Sel_txs_bins_juns"]])
+    cat("\n\n")
+}
+```
+
+# 2 Summary of detected ORFs
+
+In this section summary statistics over ORF categories in different gene biotypes are shown.
+**Note:** The definition and accuracy of ORF categories and biotypes depends also on the annotation used.\  
+
+ORF categories:\  
+
+
+**ORF_annotated**: ORF boundaries identical to annotation (start and stop codons).\  
+
+**N_truncation**: downstream start codon but same stop codon as annotated.\  
+
+**uORF**: start and stop codons upstream of annotated start codon.\  
+
+**other**: overlapping uORF, nested ORFs, C- and N-extensions, dORF etc..\  
+
+**not_annotated**: ORF in transcript with no CDS annotation.\  
+
+
+Biotypes:\  
+
+**Protein_coding**: transcript with annotated CDS.\  
+
+**non-coding isoform**: non-coding transcript from protein-coding genes.\  
+
+**pseudogene**: transcript from pseudogene (processed, unprocessed etc..).\  
+
+**non-coding RNA**: non-coding transcript from non-coding gene (excluding pseudogenes).\  
+
+
+Quantification metrics:\  
+
+**ORFs_pM** (or ORFs per Million, akin to *TPM* for RNA-seq) indicates length-normalized abundance.\  
+
+**ORF_pct_P_sites** (or % of gene translation) indicates the % of total translation for each gene. A value of 70 means that one ORF contains 70% of the total gene translation output (translation of other ORFs for that gene amounts to the remaining 30%).\
+
+
+## 2.1 Number of detected ORFs {.tabset}
+
+```{r norf_1, echo=FALSE, warning=FALSE, message=FALSE, results="asis", fig.width=10, dpi=150}
+# plot distribution for each sample in separate tabs
+for (i in c(1:length(rdata_list))){
+    cat("### ", names(rdata_list)[i], " {.tabset} \n \n")
+    print(rdata_list[[i]][["ORFs_found"]])
+    cat("\n\n")
+}
+```
+
+
+## 2.2 % of gene translation {.tabset}
+
+```{r norf_2, echo=FALSE, warning=FALSE, message=FALSE, results="asis", fig.width=10, dpi=150}
+# plot distribution for each sample in separate tabs
+for (i in c(1:length(rdata_list))){
+    cat("### ", names(rdata_list)[i], " {.tabset} \n \n")
+    print(rdata_list[[i]][["ORFs_found_pct_tr"]])
+    cat("\n\n")
+}
+```
+
+
+## 2.3 ORF length {.tabset}
+
+```{r norf_3, echo=FALSE, warning=FALSE, message=FALSE, results="asis", fig.width=10, dpi=150}
+# plot distribution for each sample in separate tabs
+for (i in c(1:length(rdata_list))){
+    cat("### ", names(rdata_list)[i], " {.tabset} \n \n")
+    print(rdata_list[[i]][["ORFs_found_len"]])
+    cat("\n\n")
+}
+```
+
+
+## 2.4 P-sites per Nucleotide per Million {.tabset}
+
+```{r norf_4, echo=FALSE, warning=FALSE, message=FALSE, results="asis", fig.width=10, dpi=150}
+# plot distribution for each sample in separate tabs
+for (i in c(1:length(rdata_list))){
+    cat("### ", names(rdata_list)[i], " {.tabset} \n \n")
+    print(rdata_list[[i]][["ORFs_found_ORFs_pM"]])
+    cat("\n\n")
+}
+```
+
+
+# 3 ORFs per gene
+
+In this section general statistics about ORF-specific translation estimates to overall gene translational output are shown.\  
+The *major ORF* is defined as the ORF harboring the highest number of P-sites positions (not normalized by ORF length).
+
+## 3.1 Number of ORFs per gene {.tabset}
+
+```{r orfg_1, echo=FALSE, warning=FALSE, message=FALSE, results="asis", fig.width=10, dpi=150}
+# plot distribution for each sample in separate tabs
+for (i in c(1:length(rdata_list))){
+    cat("### ", names(rdata_list)[i], " {.tabset} \n \n")
+    print(rdata_list[[i]][["ORFs_genes"]])
+    cat("\n\n")
+}
+```
+
+
+## 3.2 Number of ORFs per gene (against Ribo-seq signal) {.tabset}
+
+```{r orfg_2, echo=FALSE, warning=FALSE, message=FALSE, results="asis", fig.width=10, dpi=150}
+# plot distribution for each sample in separate tabs
+for (i in c(1:length(rdata_list))){
+    cat("### ", names(rdata_list)[i], " {.tabset} \n \n")
+    print(rdata_list[[i]][["ORFs_genes_tpm"]])
+    cat("\n\n")
+}
+```
+
+## 3.3 Contribution from the major ORF per gene {.tabset}
+
+```{r orfg_3, echo=FALSE, warning=FALSE, message=FALSE, results="asis", fig.width=10, dpi=150}
+# plot distribution for each sample in separate tabs
+for (i in c(1:length(rdata_list))){
+    cat("### ", names(rdata_list)[i], " {.tabset} \n \n")
+    print(rdata_list[[i]][["ORFs_maxiso"]])
+    cat("\n\n")
+}
+```
+
+## 3.4 Contribution from the major ORF per gene (against Ribo-seq signal) {.tabset}
+
+```{r orfg_4, echo=FALSE, warning=FALSE, message=FALSE, results="asis", fig.width=10, dpi=150}
+# plot distribution for each sample in separate tabs
+for (i in c(1:length(rdata_list))){
+    cat("### ", names(rdata_list)[i], " {.tabset} \n \n")
+    print(rdata_list[[i]][["ORFs_maxiso_tpm"]])
+    cat("\n\n")
+}
+```
+
+
+
