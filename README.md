@@ -30,13 +30,13 @@ parses a *.gtf* and a *.2bit* file. (this need to be done once per each annotati
 
 
 ```
-?prepare_for_SaTAnn
+?prepare_for_ORFquant
 ```
 or (**recommended**) the *Ribo-seQC* package (https://github.com/lcalviell/Ribo-seQC) can create input files for *ORFquant* using a Ribo-seq .bam file.
 
 
 ```
-?run_SaTAnn
+?run_ORFquant
 ```
 
 is the master function used to perform the entire analysis workflow, for single genes or (**recommended**) entire transcriptomes.
