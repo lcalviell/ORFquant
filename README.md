@@ -6,8 +6,7 @@ An R package for Splice-aware quantification of translation using Ribo-seq data
 This package uses syntax and functions present in Bioconductor packages like *GenomicFeatures*, *rtracklayer* or *BSgenome*. 
 *ORFquant* aims at quantifying translation at the single ORF level taking into account the presence of multiple transcripts expressed by each gene.
 To do so, the *SaTAnn* pipeline consists of transcript filtering, *de-novo* ORF finding, ORF quantification and ORF annotation.
-A variety of annotation methods, both in transcript and genomic space, is performed for each ORF, to yield a more complete picture of alternative splice sites usage, uORF translation, translation on NMD candidates etc...
-
+A variety of annotation methods, both in transcript and genomic space, is performed for each ORF, to yield a more complete picture of alternative splice sites usage, uORF translation, translation on NMD candidates and more.
 
 We recommend users to have a look at the vignette: https://htmlpreview.github.io/?https://github.com/lcalviell/ORFquant/blob/master/ORFquant_vignette.html, or our manual (*ORFquant_manual.pdf*).
 
