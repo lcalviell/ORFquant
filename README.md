@@ -8,6 +8,16 @@ This package uses syntax and functions present in Bioconductor packages like *Ge
 To do so, the *ORFquant* pipeline consists of transcript filtering, *de-novo* ORF finding, ORF quantification and ORF annotation.
 A variety of annotation methods, both in transcript and genomic space, is performed for each ORF, to yield a more complete picture of alternative splice sites usage, uORF translation, translation on NMD candidates and more.
 
+More details can be found in our manuscript:
+
+### Quantification of translation uncovers the functions of the alternative transcriptome ###
+
+*Lorenzo Calviello^, Antje Hirsekorn, Uwe Ohler^*
+
+**biorXiv (2019)**, doi: https://doi.org/10.1101/608794
+
+https://www.biorxiv.org/content/10.1101/608794v2
+
 We recommend users to have a look at the vignette: https://htmlpreview.github.io/?https://github.com/lcalviell/ORFquant/blob/master/ORFquant_vignette.html, or our manual (*ORFquant_manual.pdf*).
 
 
