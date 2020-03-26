@@ -3075,7 +3075,8 @@ run_ORFquant<-function(for_ORFquant_file,annotation_file,n_cores,prefix=for_ORFq
     lens<-elementNROWS(ORFs_found)
     
     ORFs_found<-ORFs_found[lens>0]
-    
+    if(length(ORFs_found)==0){stop(paste("No ORFs found! Please check sub-codon of Ribo-seq reads or that the annotation is correct --- ",date(),"\n"))}
+
     ORFs_txs_feats<-unlist(GRangesList(lapply(ORFs_found,function(x){unlist(x$genomic_features)})))
     ORFs_txs_feats<-ORFs_txs_feats[!duplicated(mcols(ORFs_txs_feats)) | !duplicated(ORFs_txs_feats)]
     
