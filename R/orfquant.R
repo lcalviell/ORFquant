@@ -1125,6 +1125,7 @@ detect_readthrough<-function(results_orf,P_sites,P_sites_uniq,P_sites_uniq_mm,ge
 #' which indicates how much of the ORF coverage can be assigned to such ORF (1 when no other ORF is present). 
 #' When no unique features are present on an ORF, an adjusted scaling value is calculated subtracting coverage expected from a ORF with a unique feature. 
 #' When no unique features are present on any ORF, scaling values are calculated assuming uniform coverage on each ORF.\cr
+#' Scaling values are then further scaled to adjust for average coverage (recommended) or total number of reads in the region.\cr
 #' ORFs are then further filtered to exclude lowly translated ORFs and quantification/selection is re-iterated until no ORF is further filtered out. 
 #' Percentage of total gene translation and length-adjusted quantification estimates are produced.
 #' More details about the quantificatin procedure can be found in the ORFquant manuscript.\cr\cr
@@ -1134,8 +1135,7 @@ detect_readthrough<-function(results_orf,P_sites,P_sites_uniq,P_sites_uniq_mm,ge
 #' \code{ORF_pct_P_sites_pN}: Percentage of gene translation ouptut (adjusted by length) for the ORF, derived using P_sites values.\cr
 #' \code{unique_features_reads}:  initial number of reads on each unique ORF feature. \code{NA} when no unique feature is present.\cr
 #' \code{adj_unique_features_reads}:  final number of reads on each unique ORF feature after the ORF filtering/quantification procedure. \code{NA} when no unique feature is present.\cr
-#' \code{scaling_factors}: Set of 3 scaling factors assigned to the ORF using intial unique ORF features, after adjusting for the presence of ORFs with no unique features, 
-#' and final scaling factor after correcting for total Ribo-seq coverage on the gene.
+#' \code{scaling_factors}: Set of 3 scaling factors assigned to the ORF using intial unique ORF features, after adjusting for the presence of ORFs with no unique features, and final scaling factor after correcting for average Ribo-seq coverage (or total number of reads) on the ORFs.
 #' @keywords ORFquant
 #' @author Lorenzo Calviello, \email{calviello.l.bio@@gmail.com}
 #' @param results_ORFs Full list of detected ORFs, from \code{detect_translated_ORFs}
@@ -1146,15 +1146,17 @@ detect_readthrough<-function(results_orf,P_sites,P_sites_uniq,P_sites_uniq_mm,ge
 #' @param cutoff_P_sites minimum number of P_sites assigned to the ORF to be selected. Defaults to 10
 #' @param optimiz (Beta) should numerical optimization (minimizing distance between observed coverage and expected coverage) 
 #' be used to quantify ORF translation? Defaults to FALSE
-#' @param scaling Additional scaling value taking into account total signal on the detected ORFs to adjust quantification estimates (recommended). Defaults to TRUE
+#' @param scaling Additional scaling value taking into account average or total signal on the detected ORFs to adjust quantification estimates. 
+#' Can be average_coverage or total_Psites. Defaults to total_Psites for consistency.
 #' @param uniq_signal Use only signal from uniquely mapping reads? Defaults to \code{FALSE}.
 #' @return modified \code{results_ORFs} object with the selected ORFs including quantification estimates.
 #' @seealso \code{\link{detect_translated_orfs}}, \code{\link{select_txs}}
 #' @export
 
 
-select_quantify_ORFs<-function(results_ORFs,P_sites,P_sites_uniq,cutoff_cums=NA,cutoff_pct=2,cutoff_P_sites=NA,optimiz=FALSE,scaling=TRUE,uniq_signal=F){
+select_quantify_ORFs<-function(results_ORFs,P_sites,P_sites_uniq,cutoff_cums=NA,cutoff_pct=2,cutoff_P_sites=NA,optimiz=FALSE,scaling="total_Psites",uniq_signal=F){
     
+    if(!scaling%in%c("total_Psites","average_coverage")){stop(paste("scaling parameter must be either total_Psites (recommended) or average_coverage"),date())}
     select_feat <- results_ORFs[["ORFs_features"]]
     
     select_feat<-endoapply(select_feat,function(x){
@@ -1576,6 +1578,11 @@ select_quantify_ORFs<-function(results_ORFs,P_sites,P_sites_uniq,cutoff_cums=NA,
                 feat<-feats[[i]]
                 
                 riz<-feat$reads
+                
+                if(uniq_signal){
+                    riz<-feat$unique_reads
+                }
+                
                 cov_feat<-riz/width(feat)
                 
                 js<-feat$type=="J"
@@ -1614,6 +1621,11 @@ select_quantify_ORFs<-function(results_ORFs,P_sites,P_sites_uniq,cutoff_cums=NA,
                 feat<-feats[[i]]
                 
                 riz<-feat$reads
+                
+                if(uniq_signal){
+                    riz<-feat$unique_reads
+                }
+                
                 cov_feat<-riz/width(feat)
                 
                 js<-feat$type=="J"
@@ -1659,6 +1671,11 @@ select_quantify_ORFs<-function(results_ORFs,P_sites,P_sites_uniq,cutoff_cums=NA,
                         orf_tx<-orfs_tx[[i]]
                         
                         riz<-feat$reads
+                        
+                        if(uniq_signal){
+                            riz<-feat$unique_reads
+                        }
+                        
                         cov_feat<-riz/width(feat)
                         
                         js<-feat$type=="J"
@@ -1715,6 +1732,11 @@ select_quantify_ORFs<-function(results_ORFs,P_sites,P_sites_uniq,cutoff_cums=NA,
                     feat<-feats[[i]]
                     
                     riz<-feat$reads
+                    
+                    if(uniq_signal){
+                        riz<-feat$unique_reads
+                    }
+                    
                     cov_feat<-riz/width(feat)
                     
                     
@@ -1749,7 +1771,6 @@ select_quantify_ORFs<-function(results_ORFs,P_sites,P_sites_uniq,cutoff_cums=NA,
         }
         
         
-        #added apr 6
         if(sum(unqs_adj>0)==0){
             nmmm<-names(unqs_adj)
             unqs_adj<-rep(1/length(nmmm),length(nmmm))
@@ -1825,7 +1846,7 @@ select_quantify_ORFs<-function(results_ORFs,P_sites,P_sites_uniq,cutoff_cums=NA,
             if(sum(unqs_optim>0)==0){unqs_optim<-unqs_optim_noopt}
         }
         
-        if(scaling==TRUE){
+        if(scaling=="average_coverage"){
             
             #scale to adjust coverage?
             
@@ -1859,10 +1880,88 @@ select_quantify_ORFs<-function(results_ORFs,P_sites,P_sites_uniq,cutoff_cums=NA,
             cov_unpcts<-sum(cov_unpcts)
             
             scale_f<-sum(featsall$coverage)/sum(cov_unpcts)
+            if(sum(scale_f>1)>0){scale_f<-scale_f/max(scale_f)}
             unqs_optim<-unqs_optim*scale_f
         }
         
-        
+        if(scaling=="total_Psites"){
+            
+            unqs_tott<-unqs_optim
+            orfgrps<-list()
+            for(grpo in 1:length(featsall)){
+                fezzo=featsall$ORF_id_tr_selected[[grpo]]
+                presalready<-fezzo%in%unlist(orfgrps)
+                if(sum(presalready)==0){orfgrps<-append(orfgrps,fezzo);next()}
+                if(sum(presalready)>0){
+                    presalready<-which(orfgrps%in%fezzo)
+                    for(pres in presalready){
+                        orfgrps[[pres]]<-sort(unique(c(orfgrps[[pres]],fezzo)))
+                    }
+                }
+                
+            }
+            
+            orfgrps<-unique(orfgrps)
+            if(length(orfgrps)>1){
+                orfgrpsdello<-rep(FALSE,length(orfgrps))
+                for(grpo in 1:length(orfgrps)){
+                    orfes<-orfgrps[[grpo]]
+                    otherse<-orfgrps[-grpo]
+                    remo<-FALSE
+                    for(garpo in 1:length(otherse)){
+                        contest<-otherse[[garpo]]
+                        if(sum(orfes%in%contest)==length(orfes)){remo=T;break}
+                    }
+                    orfgrpsdello[grpo]=remo
+                }
+                
+                orfgrps<-orfgrps[!orfgrpsdello]
+            }
+            
+            ps_feats_tott<-c()
+            fetse<-featsall[featsall$type=="E"]
+            rizz<-fetse$reads
+            ps_tott<-orftxs$P_sites_raw
+            names(ps_tott)<-orftxs$ORF_id_tr
+            ps_tott<-ps_tott[names(unqs_tott)]
+            
+            if(uniq_signal){
+                ps_tott<-orftxs$P_sites_raw_uniq
+                names(ps_tott)<-orftxs$ORF_id_tr
+                ps_tott<-ps_tott[names(unqs_tott)]
+                rizz<-fetse$unique_reads
+            }
+            
+            for(grpo in 1:length(orfgrps)){
+                ps_feats_tott<-c(ps_feats_tott,sum(rizz[sum(fetse$ORF_id_tr_selected%in%orfgrps[[grpo]])>0]))
+            }
+            
+            adj_psts<-unqs_tott*ps_tott
+            final_scls<-unqs_tott
+            
+            for(grpo in 1:length(orfgrps)){
+                adj_grp<-adj_psts[orfgrps[[grpo]]]
+                final_scls[orfgrps[[grpo]]]<-ps_feats_tott[grpo]/sum(adj_grp)
+            }
+            final_scls[is.infinite(final_scls)]<-0
+            
+            # to be added?
+            # final_scls[is.infinite(final_scls)]<-0
+            # final_scls[is.na(final_scls)]<-0
+            # final_scls[is.nan(final_scls)]<-0
+            # unqs_optim<-final_scls*unqs_tott
+            # 
+            # unqs_optim[is.infinite(unqs_optim)]<-0
+            # unqs_optim[is.na(unqs_optim)]<-0
+            # unqs_optim[is.nan(unqs_optim)]<-0
+            
+            
+            unqs_optim<-final_scls*unqs_tott
+            
+            unqs_optim[unqs_optim>1]<-1
+            
+            
+        }
         #apply quantification factor
         
         for(i in names(feats)){
@@ -2441,7 +2540,9 @@ annotate_splicing<-function(orf_gen,ref_cds){
 #' \code{ORF_category_Tx_compatible}: ORF annotation with respect to ORF position in the transcript, using the \code{compatible_ORF_id_tr} .\cr
 #' \code{ORF_category_Gen}: ORF annotation with respect to its genomic position .\cr
 #' \code{NMD_candidate}: TRUE or FALSE, depending on the presence of an additional exon-exon junction downstream the stop codon.\cr
-#' \code{Distance_to_lastExEx}: Distance (in nt) between the last exon-exon junction and the stop codon.
+#' \code{NMD_candidate_compatible_txs}: same as NMD_candidate, but for all transcripts compatible with the ORF structure.\cr
+#' \code{Distance_to_lastExEx}: Distance (in nt) between the last exon-exon junction and the stop codon.\cr
+#' \code{Distance_to_lastExEx_compatible_txs}: same as  Distance_to_lastExEx, but for all transcripts compatible with the ORF structure.
 #' @seealso \code{\link{select_quantify_ORFs}}, \code{\link{annotate_splicing}}
 #' @export
 
@@ -2451,8 +2552,6 @@ annotate_ORFs<-function(results_ORFs,Annotation,genome_sequence,region,genetic_c
     annotated_cds_tx<-Annotation$cds_txs[Annotation$cds_txs%over%region]
     annotated_cds_tx_genes<-Annotation$trann$gene_id[match(names(annotated_cds_tx),Annotation$trann$transcript_id)]
     annotated_exons_tx<-Annotation$exons_txs[Annotation$exons_txs%over%region]
-    
-    
     
     ORFs_tx<-results_ORFs$ORFs_tx_position
     ORFs_gen<-results_ORFs$ORFs_genomic_position
@@ -2489,13 +2588,13 @@ annotate_ORFs<-function(results_ORFs,Annotation,genome_sequence,region,genetic_c
     
     for(i in names(ORFs_gen)){
         x<-ORFs_gen[[i]]
-        mapp<-mapToTranscripts(x,transcripts = annotated_exons_tx)
-        redmapp<-reduce(split(mapp,seqnames(mapp)))
-        
-        redmapp<-redmapp[which(sum(width(redmapp))==sum(width(x)))]
-        redmapp<-redmapp[elementNROWS(redmapp)==1]
-        
-        comp<-sapply(redmapp,function(x){paste(seqnames(x),start(x),end(x),sep="_")})
+        comp<-c()
+        for(jjj in names(annotated_exons_tx)){
+            mapp<-reduce(mapToTranscripts(x,transcripts = annotated_exons_tx[jjj]))
+            if(sum(width(mapp))==sum(width(x)) & length(mapp)==1){
+                comp<-c(comp,paste(seqnames(mapp),start(mapp),end(mapp),sep="_"))
+            }
+        }
         names(comp)<-NULL
         ORFs_tx[[i]]$compatible_with<-NULL
         ORFs_tx[[i]]$compatible_with<-CharacterList(unlist(comp))
@@ -2508,10 +2607,11 @@ annotate_ORFs<-function(results_ORFs,Annotation,genome_sequence,region,genetic_c
         comp_txs<-ORFs_tx[[i]]$compatible_with[compats]
         if(length(comp_txs)>0){
             compid<-sapply(comp_txs,function(x){
-                txs<-sapply(strsplit(x,split = "_"),"[[",1)
+                txs<-sapply(strsplit(x,split = "_"),function(x){paste(x[-((length(x)-1):length(x))],collapse="_")})
                 btps<-Annotation$trann$transcript_biotype[match(txs,Annotation$trann$transcript_id)]
+                btps[is.na(btps)]<-"Not_found"
                 pcd<-btps=="protein_coding"
-                if(sum(pcd)>0){c(sort(x[pcd])[1],sort(txs[pcd])[1],"protein_coding")}else{c(x[1],txs[1],btps[1])}
+                if(sum(pcd,na.rm = T)>0){c(sort(x[pcd])[1],sort(txs[pcd])[1],"protein_coding")}else{c(x[1],txs[1],btps[1])}
             })
             ORFs_tx[[i]]$compatible_ORF_id_tr[compats]<-t(compid)[,1]
             ORFs_tx[[i]]$compatible_tx[compats]<-t(compid)[,2]
@@ -2545,8 +2645,9 @@ annotate_ORFs<-function(results_ORFs,Annotation,genome_sequence,region,genetic_c
                 compid<-sapply(comp_txs,function(x){
                     txs<-sapply(strsplit(x,split = "_"),function(x){paste(x[-((length(x)-1):length(x))],collapse="_")})
                     btps<-Annotation$trann$transcript_biotype[match(txs,Annotation$trann$transcript_id)]
+                    btps[is.na(btps)]<-"Not_found"
                     pcd<-btps=="protein_coding"
-                    if(sum(pcd)>0){c(sort(x[pcd])[1],sort(txs[pcd])[1],"protein_coding")}else{c(x[1],txs[1],btps[1])}
+                    if(sum(pcd,na.rm = T)>0){c(sort(x[pcd])[1],sort(txs[pcd])[1],"protein_coding")}else{c(x[1],txs[1],btps[1])}
                 })
                 ORFs_tx[[i]]$compatible_ORF_id_tr_longest[compats]<-t(compid)[,1]
                 ORFs_tx[[i]]$compatible_tx_longest[compats]<-t(compid)[,2]
@@ -2561,7 +2662,8 @@ annotate_ORFs<-function(results_ORFs,Annotation,genome_sequence,region,genetic_c
     for(i in names(ORFs_gen)){
         
         compss<-ORFs_tx[[i]]$compatible_with[[1]]
-        ok_id<-compss[grep(compss,pattern = ORFs_tx[[i]]$compatible_tx_longest)]
+        compss_txs<-sapply(strsplit(compss,split = "_"),function(x){paste(x[-((length(x)-1):length(x))],collapse="_")})
+        ok_id<-compss[compss_txs==ORFs_tx[[i]]$compatible_tx_longest]
         comp_ln<-ORFs_tx[[i]]$compatible_biotype_longest
         comp_prev<-ORFs_tx[[i]]$compatible_biotype
         if(comp_ln=="protein_coding" | (comp_prev!="protein_coding" & comp_ln!="protein_coding") ){
@@ -2596,10 +2698,41 @@ annotate_ORFs<-function(results_ORFs,Annotation,genome_sequence,region,genetic_c
     last_exexs<-start(txs_all)[match(unlist(GRangesList(ORFs_tx))$transcript_id,names(txs_all))]
     Distance_EJCs<-last_exexs-end(unlist(GRangesList(ORFs_tx)))
     
+    #NMD_compat
+    unlORFs<-unlist(GRangesList(ORFs_tx))
+    unlORFs_comp<-sapply(strsplit(unlist(unlORFs$compatible_with),"_"),function(x){paste(x[-((length(x)-1):length(x))],collapse="_")})
+    exs<-annotated_exons_tx[unlORFs_comp]
+    
+    strands_exs<-sapply(strand(exs),function(x){x@values[1]})
+    exs_pos<-exs[strands_exs=="+"]
+    exs_neg<-exs[strands_exs=="-"]
+    
+    last_ex_pos<-which.max(start(exs_pos))
+    last_ex_pos<-exs_pos[splitAsList(unname(last_ex_pos), names(last_ex_pos))]
+    last_ex_pos<-last_ex_pos[match(names(exs_pos),names(last_ex_pos))]
+    txs_pos<-pmapToTranscripts(last_ex_pos,transcripts = exs_pos)
+    
+    
+    last_ex_neg<-which.min(start(exs_neg))
+    last_ex_neg<-exs_neg[splitAsList(unname(last_ex_neg), names(last_ex_neg))]
+    last_ex_neg<-last_ex_neg[match(names(exs_neg),names(last_ex_neg))]
+    txs_neg<-pmapToTranscripts(last_ex_neg,transcripts = exs_neg)
+    txs_all<-unlist(c(txs_pos,txs_neg)[unlORFs_comp])
+    
+    last_exexs<-start(txs_all)
+    
+    endcompat<-as.numeric(unlist(lapply(strsplit(unlist(unlORFs$compatible_with),"_"),function(x){x[length(x)]})))
+    
+    Distance_EJCs_compat<-last_exexs-endcompat
+    nrws<-elementNROWS(unlORFs$compatible_with)
+    fcttr<-rep(1:length(nrws),nrws)
+    Distance_EJCs_compat<-CharacterList(unname(split(Distance_EJCs_compat,fcttr)))
     
     ORFs_tx<-lapply(ORFs_tx,function(x){
         cols<-mcols(x)
-        cols[,c("ref_id","ref_id_maxORF","NC_protein_isoform","ORF_category_Tx","ORF_category_Tx_compatible","ORF_category_Gen","NMD_candidate","Distance_to_lastExEx")]<-NA
+        cols[,c("ref_id","ref_id_maxORF","NC_protein_isoform","ORF_category_Tx","ORF_category_Tx_compatible","ORF_category_Gen",
+                "NMD_candidate","Distance_to_lastExEx")]<-NA
+        cols[,c("NMD_candidate_compatible_txs","Distance_to_lastExEx_compatible_txs")]<-CharacterList("")
         mcols(x)<-cols
         x
     })
@@ -2611,6 +2744,10 @@ annotate_ORFs<-function(results_ORFs,Annotation,genome_sequence,region,genetic_c
         }
         ORFs_tx[[i]]$NMD_candidate<-nmd
         ORFs_tx[[i]]$Distance_to_lastExEx<-Distance_EJCs[i]
+        
+        nmd<-Distance_EJCs_compat[i]>0
+        ORFs_tx[[i]]$NMD_candidate_compatible_txs<-nmd
+        ORFs_tx[[i]]$Distance_to_lastExEx_compatible_txs<-Distance_EJCs_compat[i]
     }
     
     
@@ -2879,6 +3016,7 @@ annotate_ORFs<-function(results_ORFs,Annotation,genome_sequence,region,genetic_c
 #' @param orf_quant.cutoff_pct \code{cutoff_pct} parameter for the \code{select_quantify_ORFs} function
 #' @param orf_quant.cutoff_P_sites \code{cutoff_P_sites} parameter for the \code{select_quantify_ORFs} function
 #' @param unique_reads Use only signal from uniquely mapping reads? Defaults to \code{FALSE}.
+#' @param orf_quant.scaling \code{scaling} parameter for the \code{select_quantify_ORFs} function. Defaults to total_Psites 
 #' @return A list containing transcript coordinates, exonic coordinates and annotation for each ORF.\cr\cr
 #' The description for each list object is as follows:\cr\cr
 #' \code{ORFs_tx}: transcript coordinates of the detected ORFs.\cr
@@ -2894,7 +3032,8 @@ annotate_ORFs<-function(results_ORFs,Annotation,genome_sequence,region,genetic_c
 
 ORFquant<-function(region,for_ORFquant,genetic_code_region,
                  orf_find.all_starts=T,orf_find.nostarts=F,orf_find.start_sel_cutoff = NA,orf_find.start_sel_cutoff_ave = .5,
-                 orf_find.cutoff_fr_ave=.5,orf_quant.cutoff_cums = NA,orf_quant.cutoff_pct = 2,orf_quant.cutoff_P_sites=NA,unique_reads=F){
+                 orf_find.cutoff_fr_ave=.5,orf_quant.cutoff_cums = NA,orf_quant.cutoff_pct = 2,orf_quant.cutoff_P_sites=NA,unique_reads=F,orf_quant.scaling="total_Psites"){
+    if(!orf_quant.scaling%in%c("total_Psites","average_coverage")){stop(paste("orf_quant.scaling parameter must be either total_Psites (recommended) or average_coverage"),date())}
     
     P_sites_region<-for_ORFquant$P_sites_all[for_ORFquant$P_sites_all%over%region]
     P_sites_uniq_region<-for_ORFquant$P_sites_uniq[for_ORFquant$P_sites_uniq%over%region]
@@ -2918,7 +3057,7 @@ ORFquant<-function(region,for_ORFquant,genetic_code_region,
         }
         if(length(res_orfs)>0){
             res_orfs<-select_quantify_ORFs(results_ORFs=res_orfs,P_sites = P_sites_region,P_sites_uniq = P_sites_uniq_region,
-                                           cutoff_cums = orf_quant.cutoff_cums,cutoff_pct = orf_quant.cutoff_pct,cutoff_P_sites=orf_quant.cutoff_P_sites,uniq_signal = unique_reads)
+                                           cutoff_cums = orf_quant.cutoff_cums,cutoff_pct = orf_quant.cutoff_pct,cutoff_P_sites=orf_quant.cutoff_P_sites,uniq_signal = unique_reads,scaling = orf_quant.scaling)
         }
         if(length(res_orfs)>0){
             
@@ -2961,6 +3100,7 @@ ORFquant<-function(region,for_ORFquant,genetic_code_region,
 #' @param stn.orf_quant.cutoff_pct \code{orf_quant.cutoff_pct} parameter for the \code{ORFquant} function
 #' @param stn.orf_quant.cutoff_P_sites \code{orf_quant.cutoff_P_sites} parameter for the \code{ORFquant} function
 #' @param unique_reads_only Use only signal from uniquely mapping reads? Defaults to \code{FALSE}.
+#' @param stn.orf_quant.scaling \code{orf_quant.scaling} parameter for the \code{ORFquant} function. Defaults to total_Psites
 #' @param canonical_start_only Use only the canonical start codon (no alternative initiation codons)? Defaults to \code{TRUE}.
 #' @return A set of output files containing transcript coordinates, exonic coordinates and annotation for each ORF, including optional GTF and protein fasta files.\cr\cr
 #' The description for each list object is as follows:\cr\cr
@@ -2977,7 +3117,10 @@ run_ORFquant<-function(for_ORFquant_file,annotation_file,n_cores,prefix=for_ORFq
                      write_temp_files=T,write_GTF_file=T,write_protein_fasta=T,interactive=T,
                      stn.orf_find.all_starts=T,stn.orf_find.nostarts=F,stn.orf_find.start_sel_cutoff = NA,
                      stn.orf_find.start_sel_cutoff_ave = .5,stn.orf_find.cutoff_fr_ave=.5,
-                     stn.orf_quant.cutoff_cums = NA,stn.orf_quant.cutoff_pct = 2,stn.orf_quant.cutoff_P_sites=NA,unique_reads_only=F,canonical_start_only=T){    
+                     stn.orf_quant.cutoff_cums = NA,stn.orf_quant.cutoff_pct = 2,stn.orf_quant.cutoff_P_sites=NA,unique_reads_only=F,canonical_start_only=T,stn.orf_quant.scaling="total_Psites"){    
+    
+    if(!stn.orf_quant.scaling%in%c("total_Psites","average_coverage")){stop(paste("stn.orf_quant.scaling parameter must be either total_Psites (recommended) or average_coverage"),date())}
+    
     if(n_cores>1){
         registerDoMC(n_cores)
     }
@@ -3041,7 +3184,7 @@ run_ORFquant<-function(for_ORFquant_file,annotation_file,n_cores,prefix=for_ORFq
                    orf_find.all_starts=stn.orf_find.all_starts,orf_find.nostarts=stn.orf_find.nostarts,
                    orf_find.start_sel_cutoff = stn.orf_find.start_sel_cutoff,orf_find.start_sel_cutoff_ave = stn.orf_find.start_sel_cutoff_ave,
                    orf_find.cutoff_fr_ave=stn.orf_find.cutoff_fr_ave,orf_quant.cutoff_cums = stn.orf_quant.cutoff_cums,
-                   orf_quant.cutoff_pct = stn.orf_quant.cutoff_pct,orf_quant.cutoff_P_sites=stn.orf_quant.cutoff_P_sites,unique_reads = unique_reads_only)
+                   orf_quant.cutoff_pct = stn.orf_quant.cutoff_pct,orf_quant.cutoff_P_sites=stn.orf_quant.cutoff_P_sites,unique_reads = unique_reads_only,orf_quant.scaling = stn.orf_quant.scaling)
         }
         
     }
@@ -3058,7 +3201,7 @@ run_ORFquant<-function(for_ORFquant_file,annotation_file,n_cores,prefix=for_ORFq
                                     orf_find.all_starts=stn.orf_find.all_starts,orf_find.nostarts=stn.orf_find.nostarts,
                                     orf_find.start_sel_cutoff = stn.orf_find.start_sel_cutoff,orf_find.start_sel_cutoff_ave = stn.orf_find.start_sel_cutoff_ave,
                                     orf_find.cutoff_fr_ave=stn.orf_find.cutoff_fr_ave,orf_quant.cutoff_cums = stn.orf_quant.cutoff_cums,
-                                    orf_quant.cutoff_pct = stn.orf_quant.cutoff_pct,orf_quant.cutoff_P_sites=stn.orf_quant.cutoff_P_sites,unique_reads = unique_reads_only)
+                                    orf_quant.cutoff_pct = stn.orf_quant.cutoff_pct,orf_quant.cutoff_P_sites=stn.orf_quant.cutoff_P_sites,unique_reads = unique_reads_only,orf_quant.scaling = stn.orf_quant.scaling)
             
             
         }
@@ -3076,7 +3219,7 @@ run_ORFquant<-function(for_ORFquant_file,annotation_file,n_cores,prefix=for_ORFq
     
     ORFs_found<-ORFs_found[lens>0]
     if(length(ORFs_found)==0){stop(paste("No ORFs found! Please check sub-codon resolution of Ribo-seq reads and ensure the annotation is correct --- ",date(),"\n"))}
-
+    
     ORFs_txs_feats<-unlist(GRangesList(lapply(ORFs_found,function(x){unlist(x$genomic_features)})))
     ORFs_txs_feats<-ORFs_txs_feats[!duplicated(mcols(ORFs_txs_feats)) | !duplicated(ORFs_txs_feats)]
     
@@ -3085,6 +3228,7 @@ run_ORFquant<-function(for_ORFquant_file,annotation_file,n_cores,prefix=for_ORFq
     lens<-elementNROWS(ORFs_found)
     
     ORFs_found<-ORFs_found[lens>1]
+    if(length(ORFs_found)==0){stop(paste("No ORFs found! Please check sub-codon of Ribo-seq reads or that the annotation is correct --- ",date(),"\n"))}
     ORFs_tx<-unlist(GRangesList(unlist(sapply(ORFs_found,function(x){unlist(x$ORFs_tx_position)}))))
     
     ORFs_feat<-unlist(sapply(ORFs_found,function(x){unlist(x$selected_ORFs_features)}))
