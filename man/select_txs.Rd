@@ -4,8 +4,14 @@
 \alias{select_txs}
 \title{Select a subset of transcripts with Ribo-seq data}
 \usage{
-select_txs(region, annotation, P_sites, P_sites_uniq, junction_counts,
-  uniq_signal = F)
+select_txs(
+  region,
+  annotation,
+  P_sites,
+  P_sites_uniq,
+  junction_counts,
+  uniq_signal = F
+)
 }
 \arguments{
 \item{region}{genomic region being analyzed}

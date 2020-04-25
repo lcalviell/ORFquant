@@ -4,9 +4,17 @@
 \alias{select_quantify_ORFs}
 \title{Select and quantify ORF translation}
 \usage{
-select_quantify_ORFs(results_ORFs, P_sites, P_sites_uniq,
-  cutoff_cums = NA, cutoff_pct = 2, cutoff_P_sites = NA,
-  optimiz = FALSE, scaling = TRUE, uniq_signal = F)
+select_quantify_ORFs(
+  results_ORFs,
+  P_sites,
+  P_sites_uniq,
+  cutoff_cums = NA,
+  cutoff_pct = 2,
+  cutoff_P_sites = NA,
+  optimiz = FALSE,
+  scaling = "total_Psites",
+  uniq_signal = F
+)
 }
 \arguments{
 \item{results_ORFs}{Full list of detected ORFs, from \code{detect_translated_ORFs}}
@@ -24,7 +32,8 @@ select_quantify_ORFs(results_ORFs, P_sites, P_sites_uniq,
 \item{optimiz}{(Beta) should numerical optimization (minimizing distance between observed coverage and expected coverage) 
 be used to quantify ORF translation? Defaults to FALSE}
 
-\item{scaling}{Additional scaling value taking into account total signal on the detected ORFs to adjust quantification estimates (recommended). Defaults to TRUE}
+\item{scaling}{Additional scaling value taking into account average or total signal on the detected ORFs to adjust quantification estimates. 
+Can be average_coverage or total_Psites. Defaults to total_Psites for consistency.}
 
 \item{uniq_signal}{Use only signal from uniquely mapping reads? Defaults to \code{FALSE}.}
 }
@@ -41,6 +50,7 @@ Ribo-seq coverage (reads/length) on bins and junctions (set to a length of 60) i
 which indicates how much of the ORF coverage can be assigned to such ORF (1 when no other ORF is present). 
 When no unique features are present on an ORF, an adjusted scaling value is calculated subtracting coverage expected from a ORF with a unique feature. 
 When no unique features are present on any ORF, scaling values are calculated assuming uniform coverage on each ORF.\cr
+Scaling values are then further scaled to adjust for average coverage (recommended) or total number of reads in the region.\cr
 ORFs are then further filtered to exclude lowly translated ORFs and quantification/selection is re-iterated until no ORF is further filtered out. 
 Percentage of total gene translation and length-adjusted quantification estimates are produced.
 More details about the quantificatin procedure can be found in the ORFquant manuscript.\cr\cr
@@ -50,8 +60,7 @@ Additional columns are added to the ORFs_tx object:\cr
 \code{ORF_pct_P_sites_pN}: Percentage of gene translation ouptut (adjusted by length) for the ORF, derived using P_sites values.\cr
 \code{unique_features_reads}:  initial number of reads on each unique ORF feature. \code{NA} when no unique feature is present.\cr
 \code{adj_unique_features_reads}:  final number of reads on each unique ORF feature after the ORF filtering/quantification procedure. \code{NA} when no unique feature is present.\cr
-\code{scaling_factors}: Set of 3 scaling factors assigned to the ORF using intial unique ORF features, after adjusting for the presence of ORFs with no unique features, 
-and final scaling factor after correcting for total Ribo-seq coverage on the gene.
+\code{scaling_factors}: Set of 3 scaling factors assigned to the ORF using intial unique ORF features, after adjusting for the presence of ORFs with no unique features, and final scaling factor after correcting for average Ribo-seq coverage (or total number of reads) on the ORFs.
 }
 \seealso{
 \code{\link{detect_translated_orfs}}, \code{\link{select_txs}}

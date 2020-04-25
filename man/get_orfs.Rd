@@ -4,8 +4,14 @@
 \alias{get_orfs}
 \title{Find ATG-starting ORFs in a sequence}
 \usage{
-get_orfs(tx_name, sequence, get_all_starts = T, Stop_Stop = F,
-  scores = c(1, 0.5), genetic_code_table)
+get_orfs(
+  tx_name,
+  sequence,
+  get_all_starts = T,
+  Stop_Stop = F,
+  scores = c(1, 0.5),
+  genetic_code_table
+)
 }
 \arguments{
 \item{tx_name}{transcript_id}

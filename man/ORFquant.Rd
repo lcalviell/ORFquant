@@ -4,12 +4,21 @@
 \alias{ORFquant}
 \title{Detection, quantification and annotation of translated ORFs in a genomic region}
 \usage{
-ORFquant(region, for_ORFquant, genetic_code_region,
-  orf_find.all_starts = T, orf_find.nostarts = F,
-  orf_find.start_sel_cutoff = NA, orf_find.start_sel_cutoff_ave = 0.5,
-  orf_find.cutoff_fr_ave = 0.5, orf_quant.cutoff_cums = NA,
-  orf_quant.cutoff_pct = 2, orf_quant.cutoff_P_sites = NA,
-  unique_reads = F)
+ORFquant(
+  region,
+  for_ORFquant,
+  genetic_code_region,
+  orf_find.all_starts = T,
+  orf_find.nostarts = F,
+  orf_find.start_sel_cutoff = NA,
+  orf_find.start_sel_cutoff_ave = 0.5,
+  orf_find.cutoff_fr_ave = 0.5,
+  orf_quant.cutoff_cums = NA,
+  orf_quant.cutoff_pct = 2,
+  orf_quant.cutoff_P_sites = NA,
+  unique_reads = F,
+  orf_quant.scaling = "total_Psites"
+)
 }
 \arguments{
 \item{region}{GRanges object with genomic coordinates of the genomic region analyzed}
@@ -35,6 +44,8 @@ ORFquant(region, for_ORFquant, genetic_code_region,
 \item{orf_quant.cutoff_P_sites}{\code{cutoff_P_sites} parameter for the \code{select_quantify_ORFs} function}
 
 \item{unique_reads}{Use only signal from uniquely mapping reads? Defaults to \code{FALSE}.}
+
+\item{orf_quant.scaling}{\code{scaling} parameter for the \code{select_quantify_ORFs} function. Defaults to total_Psites}
 }
 \value{
 A list containing transcript coordinates, exonic coordinates and annotation for each ORF.\cr\cr

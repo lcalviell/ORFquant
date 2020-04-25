@@ -4,8 +4,7 @@
 \alias{annotate_ORFs}
 \title{Annotate detected ORFs in transcript and genome space}
 \usage{
-annotate_ORFs(results_ORFs, Annotation, genome_sequence, region,
-  genetic_code)
+annotate_ORFs(results_ORFs, Annotation, genome_sequence, region, genetic_code)
 }
 \arguments{
 \item{results_ORFs}{Full list of detected ORFs, from \code{select_quantify_ORFs}}
@@ -36,7 +35,9 @@ the ORF, this is set to protein_coding.\cr
 \code{ORF_category_Tx_compatible}: ORF annotation with respect to ORF position in the transcript, using the \code{compatible_ORF_id_tr} .\cr
 \code{ORF_category_Gen}: ORF annotation with respect to its genomic position .\cr
 \code{NMD_candidate}: TRUE or FALSE, depending on the presence of an additional exon-exon junction downstream the stop codon.\cr
-\code{Distance_to_lastExEx}: Distance (in nt) between the last exon-exon junction and the stop codon.
+\code{NMD_candidate_compatible_txs}: same as NMD_candidate, but for all transcripts compatible with the ORF structure.\cr
+\code{Distance_to_lastExEx}: Distance (in nt) between the last exon-exon junction and the stop codon.\cr
+\code{Distance_to_lastExEx_compatible_txs}: same as  Distance_to_lastExEx, but for all transcripts compatible with the ORF structure.
 }
 \description{
 This function annotates quantified ORFs with respect to other detected ORFs and annotated ones, in both genome and transcript space.

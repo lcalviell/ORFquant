@@ -4,8 +4,15 @@
 \alias{calc_orf_pval}
 \title{Collect ORF Ribo-seq statistics}
 \usage{
-calc_orf_pval(ORFs, P_sites_rle, P_sites_uniq_rle, P_sites_uniq_mm_rle,
-  cutoff = 0.5, tapers = 24, bw = 12)
+calc_orf_pval(
+  ORFs,
+  P_sites_rle,
+  P_sites_uniq_rle,
+  P_sites_uniq_mm_rle,
+  cutoff = 0.5,
+  tapers = 24,
+  bw = 12
+)
 }
 \arguments{
 \item{ORFs}{Set of detected ORFs}
