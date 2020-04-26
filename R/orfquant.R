@@ -5037,7 +5037,7 @@ plot_ORFquant_results<-function(for_ORFquant_file,ORFquant_output_file,annotatio
     gens_sel<-unique(GTF_annotation$trann$gene_id[GTF_annotation$trann$transcript_id%in%selected_txs])
     tx_all<-GTF_annotation$trann$transcript_id[GTF_annotation$trann$gene_id%in%gens_sel]
     tx_sel<-selected_txs
-    if(sum(!tx_sel%in%names(GTF_annotation$exons_txs))>0){warning(paste("some selected Txs not present in annotation!, like:",head(tx_sel[!tx_sel%in%names(GTF_annotation$exons_txs)])))}
+    if(sum(!tx_sel%in%names(GTF_annotation$exons_txs))>0){warning(paste("some selected Txs not present in annotation!, like:",head(tx_sel[!tx_sel%in%names(GTF_annotation$exons_txs)],1)))}
     tx_sel<-tx_sel[tx_sel%in%names(GTF_annotation$exons_txs)]
     
     tx_cds<-names(GTF_annotation$cds_txs)
