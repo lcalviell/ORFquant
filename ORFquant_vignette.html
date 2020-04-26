@@ -261,7 +261,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">ORFquant vignette</h1>
 <h4 class="author">Lorenzo Calviello</h4>
-<h4 class="date">24 April, 2020</h4>
+<h4 class="date">26 April, 2020</h4>
 
 </div>
 
@@ -287,11 +287,11 @@ download.file(&quot;https://drive.google.com/uc?export=download&amp;id=19Am9-iME
                          twobit_file = &quot;test_human.2bit&quot;,
                          gtf_file = &quot;test_human.gtf&quot;,scientific_name = &quot;Human.test&quot;,
                          annotation_name = &quot;genc25_22M&quot;,export_bed_tables_TxDb = F,forge_BSgenome = T,create_TxDb = T)</code></pre>
-<pre><code>## Creating the BSgenome package ... Fri Apr 24 21:20:34 2020
+<pre><code>## Creating the BSgenome package ... Sun Apr 26 13:45:44 2020
 ## Creating package in /bfd/lcalviel/ORFquant/test_vignette/BSgenome.Human.test.genc2522M 
 ## Copying '/bfd/lcalviel/ORFquant/test_vignette/test_human.2bit' to '/bfd/lcalviel/ORFquant/test_vignette/BSgenome.Human.test.genc2522M/inst/extdata/single_sequences.2bit' ... DONE
-## Creating the BSgenome package --- Done! Fri Apr 24 21:20:34 2020
-## Installing the BSgenome package ... Fri Apr 24 21:20:34 2020
+## Creating the BSgenome package --- Done! Sun Apr 26 13:45:44 2020
+## Installing the BSgenome package ... Sun Apr 26 13:45:44 2020
 ##   
    checking for file ‘/bfd/lcalviel/ORFquant/test_vignette/BSgenome.Human.test.genc2522M/DESCRIPTION’ ...
   
@@ -316,7 +316,7 @@ download.file(&quot;https://drive.google.com/uc?export=download&amp;id=19Am9-iME
    
 ## 
 Running /usr/local/lib/R/bin/R CMD INSTALL \
-##   /tmp/RtmpqEvCeo/BSgenome.Human.test.genc2522M_1.0.tar.gz --install-tests 
+##   /tmp/RtmpJHrkf8/BSgenome.Human.test.genc2522M_1.0.tar.gz --install-tests 
 ## * installing to library ‘/bfd/lcalviel/R/x86_64-pc-linux-gnu-library/3.6’
 ## * installing *source* package ‘BSgenome.Human.test.genc2522M’ ...
 ## ** using staged installation
@@ -330,19 +330,19 @@ Running /usr/local/lib/R/bin/R CMD INSTALL \
 ## ** testing if installed package can be loaded from final location
 ## ** testing if installed package keeps a record of temporary installation path
 ## * DONE (BSgenome.Human.test.genc2522M)
-## Installing the BSgenome package --- Done! Fri Apr 24 21:21:03 2020
-## Creating the TxDb object ... Fri Apr 24 21:21:03 2020</code></pre>
+## Installing the BSgenome package --- Done! Sun Apr 26 13:46:14 2020
+## Creating the TxDb object ... Sun Apr 26 13:46:14 2020</code></pre>
 <pre><code>## Import genomic features from the file as a GRanges object ... OK
 ## Prepare the 'metadata' data frame ... OK
 ## Make the TxDb object ...</code></pre>
 <pre><code>## Warning in .get_cds_IDX(mcols0$type, mcols0$phase): The &quot;phase&quot; metadata column contains non-NA values for features of type
 ##   stop_codon. This information was ignored.</code></pre>
 <pre><code>## OK</code></pre>
-<pre><code>## Creating the TxDb object --- Done! Fri Apr 24 21:21:05 2020
-## Extracting genomic regions ... Fri Apr 24 21:21:05 2020
-## Extracting ids and biotypes ... Fri Apr 24 21:21:12 2020
-## Defining most common start/stop codons ... Fri Apr 24 21:21:15 2020
-## Rannot object created!   Fri Apr 24 21:21:20 2020</code></pre>
+<pre><code>## Creating the TxDb object --- Done! Sun Apr 26 13:46:16 2020
+## Extracting genomic regions ... Sun Apr 26 13:46:16 2020
+## Extracting ids and biotypes ... Sun Apr 26 13:46:24 2020
+## Defining most common start/stop codons ... Sun Apr 26 13:46:28 2020
+## Rannot object created!   Sun Apr 26 13:46:32 2020</code></pre>
 <p>We can now read such information using the <em>load_annotation</em> function:</p>
 <pre class="r"><code>load_annotation(&quot;test_human.gtf_Rannot&quot;)</code></pre>
 <p>Two objects have now been created: a <em>genome_seq</em> object links to the <em>BSgenome</em> package we just created and loaded (containing genome sequences), and a <em>GTF_annotation</em> object containing important information present in our <em>.gtf</em> file. For instance, we can access genomic sequences using commands as:</p>
@@ -609,28 +609,28 @@ Running /usr/local/lib/R/bin/R CMD INSTALL \
 <h2>Prepare input files (human)</h2>
 <p>Let’s now download a subset of a Ribo-seq dataset in HEK293 cells [3].</p>
 <pre class="r"><code>download.file(&quot;https://ucsf.box.com/shared/static/g9uupr9c4is54e5cygcdzumh4jl915zo.bam&quot;,destfile = &quot;test_human_hek.bam&quot;)</code></pre>
-<p>There are two ways to prepare the input file for <em>ORFquant</em>: the recommended one is to use <em>Ribo-seQC</em> [2], which automatically output a “*for_ORFquant&quot; file together with many other statistics about the alignment.</p>
-<p>As an alternative, we can use the <em>prepare_for_ORFquant</em> function, supplied with the bam file together with a text file specifying read lengths and cutoffs to use (as well as information about their possible organelle of origin [2]):</p>
+<p>There are two ways to prepare the input file for <em>ORFquant</em>: the recommended one is to use <em>Ribo-seQC</em> [2], which automatically output a “<em>for_ORFquant&quot; file together with many other statistics about the alignment. As an alternative, we can use the </em>prepare_for_ORFquant* function, supplied with the bam file together with a text file specifying read lengths and cutoffs to use (as well as information about their possible organelle of origin [2]):</p>
 <pre class="r"><code>download.file(&quot;https://drive.google.com/uc?export=download&amp;id=1cszfwJKiTeQMK-G4_R5KOt8rWoFrV-R_&quot;,destfile =&quot;instructions_hektest.txt&quot;)
 prepare_for_ORFquant(annotation_file = &quot;test_human.gtf_Rannot&quot;,bam_file = &quot;test_human_hek.bam&quot;,path_to_rl_cutoff_file = &quot;instructions_hektest.txt&quot;)</code></pre>
 <pre><code>## Using 28,55 nt long footprints with 12,12 as cutoffs, 'chrM' compartment ... 
 ## Using 29,30,28,27,31,26,32 nt long footprints with 12,12,12,12,12,9,13 as cutoffs, 'nucl' compartment ... 
-## Calculating P-sites positions and junctions ... Fri Apr 24 21:21:25 2020 
-## Calculating P-sites positions and junctions --- Done! Fri Apr 24 21:21:37 2020</code></pre>
+## Calculating P-sites positions and junctions ... Sun Apr 26 13:46:37 2020 
+## Calculating P-sites positions and junctions --- Done! Sun Apr 26 13:46:50 2020</code></pre>
 <p>Additionally, users can input their custom P_sites track using other options in the <em>prepare_for_ORFquant</em> function.</p>
 </div>
 <div id="run-orfquant" class="section level2">
 <h2>Run ORFquant</h2>
-<p>We can now run ORFquant using the annotation and the <em>for_ORFquant</em> file we created. ORFquant can be run on a specific list of genes, or (<strong>recommended!</strong>) on the entire set of possible transcripts. We strongly recommend running ORFquant on the entire transcriptome, to check the overall validity of its results (see next section).</p>
-<p><strong>NOTE:</strong> We recommend to run ORFquant on an HPC cluster. On average, using 7 cores with 10G of RAM per core will take ~12 hours to run the pipeline on the entire transcriptome.</p>
-<pre class="r"><code>run_ORFquant(for_ORFquant_file = &quot;test_human_hek.bam_for_ORFquant&quot;,
-           annotation_file = &quot;test_human.gtf_Rannot&quot;,n_cores = 1,gene_name =c(&quot;MIEF1&quot;,&quot;DRG2&quot;))</code></pre>
-<pre><code>## Loading annotation and Ribo-seq signal ... Fri Apr 24 21:21:37 2020
-## Loading annotation and Ribo-seq signal --- Done! Fri Apr 24 21:21:37 2020
-## Summoning ORFquant with 24 P_sites positions over 1 genomic regions using 1 processor(s) ... Fri Apr 24 21:21:37 2020
-## Summoning ORFquant --- Done! Fri Apr 24 21:21:53 2020
-## Exporting ORFquant results ... Fri Apr 24 21:21:53 2020
-## Exporting ORFquant results --- Done! Fri Apr 24 21:21:54 2020</code></pre>
+<p>We can now run ORFquant using the annotation and the <em>for_ORFquant</em> file. ORFquant can be run on a specific list of genes, or (<strong>recommended!</strong>) on the entire set of possible transcripts. We strongly recommend running ORFquant on the entire transcriptome, to check the overall validity of its results (see next section).</p>
+<p><strong>NOTE:</strong> We recommend to run ORFquant on an HPC cluster. On average, using 6 cores with 20G of RAM will take ~10 hours to run the pipeline on the entire transcriptome.</p>
+<pre class="r"><code>download.file(&quot;https://bimsbstatic.mdc-berlin.de/ohler/Lorenzo/tests_packages/HEK293_Aligned.sortedByCoord.out.bam_for_ORFquant&quot;,destfile = &quot;HEK293_for_ORFquant&quot;)
+run_ORFquant(for_ORFquant_file = &quot;HEK293_for_ORFquant&quot;,
+           annotation_file = &quot;test_human.gtf_Rannot&quot;,n_cores = 1,gene_name =c(&quot;MIEF1&quot;,&quot;IL17RA&quot;))</code></pre>
+<pre><code>## Loading annotation and Ribo-seq signal ... Sun Apr 26 13:46:55 2020
+## Loading annotation and Ribo-seq signal --- Done! Sun Apr 26 13:46:58 2020
+## Summoning ORFquant with 685 P_sites positions over 2 genomic regions using 1 processor(s) ... Sun Apr 26 13:47:00 2020
+## Summoning ORFquant --- Done! Sun Apr 26 13:48:20 2020
+## Exporting ORFquant results ... Sun Apr 26 13:48:20 2020
+## Exporting ORFquant results --- Done! Sun Apr 26 13:48:21 2020</code></pre>
 <p>This will produce different files, such as annotation in .gtf format for the <em>de-novo</em> identified ORFs or protein sequences in .fasta format. For a more detailed list of output files, please check:</p>
 <pre class="r"><code>?run_ORFquant</code></pre>
 <p>Additionally, an object called <em>ORFquant_results</em> (corresponding to the <em>final_ORFquant_results</em> file, use the <em>load</em> function to import it) should be now available in your environment:</p>
@@ -640,120 +640,232 @@ prepare_for_ORFquant(annotation_file = &quot;test_human.gtf_Rannot&quot;,bam_fil
 ## [7] &quot;ORFs_txs_feats&quot;        &quot;selected_txs&quot;</code></pre>
 <p>Such an object is a <em>list</em> containing comprehensive statistics on the set of identified ORFs. For example:</p>
 <pre class="r"><code>ORFquant_results$ORFs_tx</code></pre>
-<pre><code>## GRanges object with 1 range and 41 metadata columns:
-##                                       seqnames    ranges strand | ave_pct_fr
-##                                          &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; |  &lt;numeric&gt;
-##   ENST00000325301.6_569_1813 ENST00000325301.6  569-1813      + |     71.875
-##                                 pct_fr ave_pct_fr_st pct_fr_st
-##                              &lt;numeric&gt;     &lt;numeric&gt; &lt;numeric&gt;
-##   ENST00000325301.6_569_1813    0.7222            50        50
-##                                               longest_ORF               pval
-##                                                 &lt;GRanges&gt;          &lt;numeric&gt;
-##   ENST00000325301.6_569_1813 ENST00000325301.6:425-1813:+ 0.0202640768960356
-##                                       pval_uniq P_sites_raw P_sites_raw_uniq
-##                                       &lt;numeric&gt;   &lt;integer&gt;        &lt;integer&gt;
-##   ENST00000325301.6_569_1813 0.0202640768960356          18               18
-##                              P_sites_raw_uniq_mm                  ORF_id_tr
-##                                        &lt;integer&gt;                &lt;character&gt;
-##   ENST00000325301.6_569_1813                   2 ENST00000325301.6_569_1813
-##                                              Protein                    region
-##                                        &lt;AAStringSet&gt;                 &lt;GRanges&gt;
-##   ENST00000325301.6_569_1813 MYDRAISAPT...LSEPEVLLQT chr22:39499432-39518132:+
-##                                         gene_id   gene_biotype   gene_name
-##                                     &lt;character&gt;    &lt;character&gt; &lt;character&gt;
-##   ENST00000325301.6_569_1813 ENSG00000100335.13 protein_coding       MIEF1
-##                                  transcript_id transcript_biotype   P_sites
-##                                    &lt;character&gt;        &lt;character&gt; &lt;numeric&gt;
-##   ENST00000325301.6_569_1813 ENST00000325301.6     protein_coding        18
-##                              ORF_pct_P_sites ORF_pct_P_sites_pN
-##                                    &lt;numeric&gt;          &lt;numeric&gt;
-##   ENST00000325301.6_569_1813             100                100
-##                              unique_features_reads adj_unique_features_reads
-##                                      &lt;NumericList&gt;             &lt;NumericList&gt;
-##   ENST00000325301.6_569_1813             2,0,2,...                 2,0,2,...
-##                              scaling_factors
-##                                &lt;NumericList&gt;
-##   ENST00000325301.6_569_1813           1,1,1
-##                                                                    compatible_with
-##                                                                    &lt;CharacterList&gt;
-##   ENST00000325301.6_569_1813 ENST00000325301.6_569_1813,ENST00000404569.5_695_1939
-##                              compatible_biotype     compatible_tx
-##                                     &lt;character&gt;       &lt;character&gt;
-##   ENST00000325301.6_569_1813     protein_coding ENST00000325301.6
-##                                    compatible_ORF_id_tr
-##                                             &lt;character&gt;
-##   ENST00000325301.6_569_1813 ENST00000325301.6_569_1813
-##                                                            compatible_with_longest
-##                                                                    &lt;CharacterList&gt;
-##   ENST00000325301.6_569_1813 ENST00000325301.6_425_1813,ENST00000404569.5_551_1939
-##                              compatible_ORF_id_tr_longest            ref_id
-##                                               &lt;character&gt;       &lt;character&gt;
-##   ENST00000325301.6_569_1813   ENST00000325301.6_425_1813 ENST00000402881.5
-##                                           ref_id_maxORF NC_protein_isoform
-##                                             &lt;character&gt;        &lt;character&gt;
-##   ENST00000325301.6_569_1813 ENST00000325301.6_569_1813                N_C
-##                              ORF_category_Tx ORF_category_Tx_compatible
-##                                  &lt;character&gt;                &lt;character&gt;
-##   ENST00000325301.6_569_1813    N_truncation               N_truncation
-##                                  ORF_category_Gen NMD_candidate
-##                                       &lt;character&gt;     &lt;logical&gt;
-##   ENST00000325301.6_569_1813 Alt3_start_Alt5_stop         FALSE
-##                              Distance_to_lastExEx NMD_candidate_compatible_txs
-##                                         &lt;integer&gt;                &lt;LogicalList&gt;
-##   ENST00000325301.6_569_1813                 -803                  FALSE,FALSE
-##                              Distance_to_lastExEx_compatible_txs   ORFs_pM
-##                                                  &lt;CharacterList&gt; &lt;numeric&gt;
-##   ENST00000325301.6_569_1813                           -803,-803     1e+06
+<pre><code>## GRanges object with 6 ranges and 41 metadata columns:
+##                                         seqnames    ranges strand | ave_pct_fr
+##                                            &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; |  &lt;numeric&gt;
+##   ENST00000319363.10_134_2731 ENST00000319363.10  134-2731      + |    79.9589
+##    ENST00000612619.1_134_2629  ENST00000612619.1  134-2629      + |    79.4648
+##      ENST00000433117.6_61_117  ENST00000433117.6    61-117      + |    64.7321
+##     ENST00000433117.6_165_374  ENST00000433117.6   165-374      + |    73.4783
+##     ENST00000433117.6_476_919  ENST00000433117.6   476-919      + |    58.4115
+##    ENST00000325301.6_425_1813  ENST00000325301.6  425-1813      + |    73.6914
+##                                  pct_fr ave_pct_fr_st pct_fr_st
+##                               &lt;numeric&gt;     &lt;numeric&gt; &lt;numeric&gt;
+##   ENST00000319363.10_134_2731    0.8215       80.6944   83.3333
+##    ENST00000612619.1_134_2629    0.8178       80.6944   83.3333
+##      ENST00000433117.6_61_117    0.7059            75        70
+##     ENST00000433117.6_165_374    0.7491          &lt;NA&gt;      &lt;NA&gt;
+##     ENST00000433117.6_476_919    0.5512       61.6667   58.8235
+##    ENST00000325301.6_425_1813    0.7562       61.6667   58.8235
+##                                                 longest_ORF
+##                                                   &lt;GRanges&gt;
+##   ENST00000319363.10_134_2731 ENST00000319363.10:134-2731:+
+##    ENST00000612619.1_134_2629  ENST00000612619.1:134-2629:+
+##      ENST00000433117.6_61_117    ENST00000433117.6:61-117:+
+##     ENST00000433117.6_165_374   ENST00000433117.6:165-374:+
+##     ENST00000433117.6_476_919   ENST00000433117.6:476-919:+
+##    ENST00000325301.6_425_1813  ENST00000325301.6:425-1813:+
+##                                               pval            pval_uniq
+##                                          &lt;numeric&gt;            &lt;numeric&gt;
+##   ENST00000319363.10_134_2731 2.73049470015838e-16 2.61746578988536e-16
+##    ENST00000612619.1_134_2629 6.51170295389324e-16 6.14577194548666e-16
+##      ENST00000433117.6_61_117  0.00916751959906466  0.00916751959906466
+##     ENST00000433117.6_165_374 3.43548726067333e-05 3.43548726067333e-05
+##     ENST00000433117.6_476_919 1.77316662329043e-05 2.12156581878839e-05
+##    ENST00000325301.6_425_1813 1.23371587370833e-09 2.29516797994698e-09
+##                               P_sites_raw P_sites_raw_uniq P_sites_raw_uniq_mm
+##                                 &lt;integer&gt;        &lt;integer&gt;           &lt;integer&gt;
+##   ENST00000319363.10_134_2731         493              492                  40
+##    ENST00000612619.1_134_2629         483              482                  39
+##      ENST00000433117.6_61_117          51               51                   2
+##     ENST00000433117.6_165_374         275              275                  14
+##     ENST00000433117.6_476_919         127              126                   8
+##    ENST00000325301.6_425_1813         562              556                  32
+##                                                 ORF_id_tr
+##                                               &lt;character&gt;
+##   ENST00000319363.10_134_2731 ENST00000319363.10_134_2731
+##    ENST00000612619.1_134_2629  ENST00000612619.1_134_2629
+##      ENST00000433117.6_61_117    ENST00000433117.6_61_117
+##     ENST00000433117.6_165_374   ENST00000433117.6_165_374
+##     ENST00000433117.6_476_919   ENST00000433117.6_476_919
+##    ENST00000325301.6_425_1813  ENST00000325301.6_425_1813
+##                                               Protein                    region
+##                                         &lt;AAStringSet&gt;                 &lt;GRanges&gt;
+##   ENST00000319363.10_134_2731 MGAARSPPSA...MGSESEGPSA chr22:17084954-17115694:+
+##    ENST00000612619.1_134_2629 MGAARSPPSA...MGSESEGPSA chr22:17084954-17115694:+
+##      ENST00000433117.6_61_117     MLMGDPGRGTRPEASPAEW chr22:39499432-39518132:+
+##     ENST00000433117.6_165_374 MAPWSREAVL...FLNGKLGRII chr22:39499432-39518132:+
+##     ENST00000433117.6_476_919 MAGAGERKGK...APELPAGQVA chr22:39499432-39518132:+
+##    ENST00000325301.6_425_1813 MAGAGERKGK...LSEPEVLLQT chr22:39499432-39518132:+
+##                                          gene_id   gene_biotype   gene_name
+##                                      &lt;character&gt;    &lt;character&gt; &lt;character&gt;
+##   ENST00000319363.10_134_2731 ENSG00000177663.13 protein_coding      IL17RA
+##    ENST00000612619.1_134_2629 ENSG00000177663.13 protein_coding      IL17RA
+##      ENST00000433117.6_61_117 ENSG00000100335.13 protein_coding       MIEF1
+##     ENST00000433117.6_165_374 ENSG00000100335.13 protein_coding       MIEF1
+##     ENST00000433117.6_476_919 ENSG00000100335.13 protein_coding       MIEF1
+##    ENST00000325301.6_425_1813 ENSG00000100335.13 protein_coding       MIEF1
+##                                    transcript_id      transcript_biotype
+##                                      &lt;character&gt;             &lt;character&gt;
+##   ENST00000319363.10_134_2731 ENST00000319363.10          protein_coding
+##    ENST00000612619.1_134_2629  ENST00000612619.1          protein_coding
+##      ENST00000433117.6_61_117  ENST00000433117.6 nonsense_mediated_decay
+##     ENST00000433117.6_165_374  ENST00000433117.6 nonsense_mediated_decay
+##     ENST00000433117.6_476_919  ENST00000433117.6 nonsense_mediated_decay
+##    ENST00000325301.6_425_1813  ENST00000325301.6          protein_coding
+##                                        P_sites ORF_pct_P_sites
+##                                      &lt;numeric&gt;       &lt;numeric&gt;
+##   ENST00000319363.10_134_2731 267.232046103508         54.2053
+##    ENST00000612619.1_134_2629 225.767953896492         45.7947
+##      ENST00000433117.6_61_117               51          5.7432
+##     ENST00000433117.6_165_374              275         30.9685
+##     ENST00000433117.6_476_919 72.1075373552649          8.1202
+##    ENST00000325301.6_425_1813 489.892462644735         55.1681
+##                               ORF_pct_P_sites_pN unique_features_reads
+##                                        &lt;numeric&gt;         &lt;NumericList&gt;
+##   ENST00000319363.10_134_2731            53.2095                9,10,2
+##    ENST00000612619.1_134_2629            46.7905                     5
+##      ENST00000433117.6_61_117            32.9025                    51
+##     ENST00000433117.6_165_374            48.1556                   275
+##     ENST00000433117.6_476_919             5.9722                     9
+##    ENST00000325301.6_425_1813            12.9698            7,19,1,...
+##                               adj_unique_features_reads      scaling_factors
+##                                           &lt;NumericList&gt;        &lt;NumericList&gt;
+##   ENST00000319363.10_134_2731                    9,10,2 0.6166,0.6166,0.5421
+##    ENST00000612619.1_134_2629                         5 0.5317,0.5317,0.4674
+##      ENST00000433117.6_61_117                        51                1,1,1
+##     ENST00000433117.6_165_374                       275                1,1,1
+##     ENST00000433117.6_476_919                         9 0.6513,0.6513,0.5678
+##    ENST00000325301.6_425_1813                7,19,1,...           1,1,0.8717
+##                                                                                                 compatible_with
+##                                                                                                 &lt;CharacterList&gt;
+##   ENST00000319363.10_134_2731                                                       ENST00000319363.10_134_2731
+##    ENST00000612619.1_134_2629                                                        ENST00000612619.1_134_2629
+##      ENST00000433117.6_61_117 ENST00000467866.1_246_302,ENST00000489792.1_152_208,ENST00000478342.5_111_167,...
+##     ENST00000433117.6_165_374 ENST00000402881.5_187_396,ENST00000467866.1_350_559,ENST00000478342.5_397_606,...
+##     ENST00000433117.6_476_919                               ENST00000433117.6_476_919,ENST00000428069.1_531_974
+##    ENST00000325301.6_425_1813                             ENST00000325301.6_425_1813,ENST00000404569.5_551_1939
+##                                    compatible_biotype      compatible_tx
+##                                           &lt;character&gt;        &lt;character&gt;
+##   ENST00000319363.10_134_2731          protein_coding ENST00000319363.10
+##    ENST00000612619.1_134_2629          protein_coding  ENST00000612619.1
+##      ENST00000433117.6_61_117          protein_coding  ENST00000325301.6
+##     ENST00000433117.6_165_374          protein_coding  ENST00000325301.6
+##     ENST00000433117.6_476_919 nonsense_mediated_decay  ENST00000433117.6
+##    ENST00000325301.6_425_1813          protein_coding  ENST00000325301.6
+##                                      compatible_ORF_id_tr
+##                                               &lt;character&gt;
+##   ENST00000319363.10_134_2731 ENST00000319363.10_134_2731
+##    ENST00000612619.1_134_2629  ENST00000612619.1_134_2629
+##      ENST00000433117.6_61_117     ENST00000325301.6_10_66
+##     ENST00000433117.6_165_374   ENST00000325301.6_114_323
+##     ENST00000433117.6_476_919   ENST00000433117.6_476_919
+##    ENST00000325301.6_425_1813  ENST00000325301.6_425_1813
+##                                                                                         compatible_with_longest
+##                                                                                                 &lt;CharacterList&gt;
+##   ENST00000319363.10_134_2731                                                       ENST00000319363.10_134_2731
+##    ENST00000612619.1_134_2629                                                        ENST00000612619.1_134_2629
+##      ENST00000433117.6_61_117 ENST00000467866.1_246_302,ENST00000489792.1_152_208,ENST00000478342.5_111_167,...
+##     ENST00000433117.6_165_374 ENST00000402881.5_187_396,ENST00000467866.1_350_559,ENST00000478342.5_397_606,...
+##     ENST00000433117.6_476_919                               ENST00000433117.6_476_919,ENST00000428069.1_531_974
+##    ENST00000325301.6_425_1813                             ENST00000325301.6_425_1813,ENST00000404569.5_551_1939
+##                               compatible_ORF_id_tr_longest             ref_id
+##                                                &lt;character&gt;        &lt;character&gt;
+##   ENST00000319363.10_134_2731  ENST00000319363.10_134_2731 ENST00000319363.10
+##    ENST00000612619.1_134_2629   ENST00000612619.1_134_2629 ENST00000319363.10
+##      ENST00000433117.6_61_117      ENST00000325301.6_10_66               &lt;NA&gt;
+##     ENST00000433117.6_165_374    ENST00000325301.6_114_323  ENST00000402881.5
+##     ENST00000433117.6_476_919    ENST00000433117.6_476_919  ENST00000402881.5
+##    ENST00000325301.6_425_1813   ENST00000325301.6_425_1813  ENST00000402881.5
+##                                             ref_id_maxORF NC_protein_isoform
+##                                               &lt;character&gt;        &lt;character&gt;
+##   ENST00000319363.10_134_2731 ENST00000319363.10_134_2731               same
+##    ENST00000612619.1_134_2629 ENST00000319363.10_134_2731               same
+##      ENST00000433117.6_61_117  ENST00000325301.6_425_1813               &lt;NA&gt;
+##     ENST00000433117.6_165_374  ENST00000325301.6_425_1813                N_C
+##     ENST00000433117.6_476_919  ENST00000325301.6_425_1813                  C
+##    ENST00000325301.6_425_1813  ENST00000325301.6_425_1813                  C
+##                               ORF_category_Tx ORF_category_Tx_compatible
+##                                   &lt;character&gt;                &lt;character&gt;
+##   ENST00000319363.10_134_2731   ORF_annotated              ORF_annotated
+##    ENST00000612619.1_134_2629   ORF_annotated              ORF_annotated
+##      ENST00000433117.6_61_117            uORF                       uORF
+##     ENST00000433117.6_165_374            uORF                       uORF
+##     ENST00000433117.6_476_919   ORF_annotated              ORF_annotated
+##    ENST00000325301.6_425_1813   ORF_annotated              ORF_annotated
+##                                   ORF_category_Gen NMD_candidate
+##                                        &lt;character&gt;     &lt;logical&gt;
+##   ENST00000319363.10_134_2731     exact_start_stop         FALSE
+##    ENST00000612619.1_134_2629     exact_start_stop         FALSE
+##      ENST00000433117.6_61_117       novel_Upstream          TRUE
+##     ENST00000433117.6_165_374 Alt5_start_Alt5_stop          TRUE
+##     ENST00000433117.6_476_919            Alt5_stop          TRUE
+##    ENST00000325301.6_425_1813            Alt5_stop         FALSE
+##                               Distance_to_lastExEx NMD_candidate_compatible_txs
+##                                          &lt;integer&gt;                &lt;LogicalList&gt;
+##   ENST00000319363.10_134_2731                -1510                        FALSE
+##    ENST00000612619.1_134_2629                -1510                        FALSE
+##      ENST00000433117.6_61_117                  858           TRUE,TRUE,TRUE,...
+##     ENST00000433117.6_165_374                  601         TRUE,FALSE,FALSE,...
+##     ENST00000433117.6_476_919                   56                    TRUE,TRUE
+##    ENST00000325301.6_425_1813                 -803                  FALSE,FALSE
+##                               Distance_to_lastExEx_compatible_txs
+##                                                   &lt;CharacterList&gt;
+##   ENST00000319363.10_134_2731                               -1510
+##    ENST00000612619.1_134_2629                               -1510
+##      ENST00000433117.6_61_117                      20,216,202,...
+##     ENST00000433117.6_165_374                  1395,-237,-237,...
+##     ENST00000433117.6_476_919                               56,56
+##    ENST00000325301.6_425_1813                           -803,-803
+##                                        ORFs_pM
+##                                      &lt;numeric&gt;
+##   ENST00000319363.10_134_2731 35314.8865756761
+##    ENST00000612619.1_134_2629 31054.6144369881
+##      ENST00000433117.6_61_117 307187.646022375
+##     ENST00000433117.6_165_374 449595.364276446
+##     ENST00000433117.6_476_919 55757.8628182369
+##    ENST00000325301.6_425_1813 121089.625870278
 ##   -------
 ##   seqinfo: 4509 sequences from an unspecified genome</code></pre>
 <p>will show transcript positions and and other statistics about the quantification of translation on each of the identified ORFs, while:</p>
 <pre class="r"><code>ORFquant_results$ORFs_gen</code></pre>
-<pre><code>## GRanges object with 3 ranges and 0 metadata columns:
-##                              seqnames            ranges strand
-##                                 &lt;Rle&gt;         &lt;IRanges&gt;  &lt;Rle&gt;
-##   ENST00000325301.6_569_1813    chr22 39511849-39512026      +
-##   ENST00000325301.6_569_1813    chr22 39512232-39512494      +
-##   ENST00000325301.6_569_1813    chr22 39513517-39514320      +
+<pre><code>## GRanges object with 34 ranges and 0 metadata columns:
+##                               seqnames            ranges strand
+##                                  &lt;Rle&gt;         &lt;IRanges&gt;  &lt;Rle&gt;
+##   ENST00000319363.10_134_2731    chr22 17085092-17085229      +
+##   ENST00000319363.10_134_2731    chr22 17097062-17097086      +
+##   ENST00000319363.10_134_2731    chr22 17097797-17097943      +
+##   ENST00000319363.10_134_2731    chr22 17098775-17098887      +
+##   ENST00000319363.10_134_2731    chr22 17100355-17100481      +
+##                           ...      ...               ...    ...
+##     ENST00000433117.6_476_919    chr22 39512318-39512439      +
+##    ENST00000325301.6_425_1813    chr22 39511295-39511438      +
+##    ENST00000325301.6_425_1813    chr22 39511849-39512026      +
+##    ENST00000325301.6_425_1813    chr22 39512232-39512494      +
+##    ENST00000325301.6_425_1813    chr22 39513517-39514320      +
 ##   -------
 ##   seqinfo: 2 sequences (1 circular) from an unspecified genome</code></pre>
 <p>will show genomic regions corresponding to the identified ORFs.</p>
 <p>The list of selected transcripts can be accessed using:</p>
 <pre class="r"><code>ORFquant_results$selected_txs</code></pre>
-<pre><code>## [1] &quot;ENST00000325301.6&quot; &quot;ENST00000433117.6&quot;</code></pre>
+<pre><code>## [1] &quot;ENST00000319363.10&quot; &quot;ENST00000325301.6&quot;  &quot;ENST00000404569.5&quot; 
+## [4] &quot;ENST00000428069.1&quot;  &quot;ENST00000433117.6&quot;  &quot;ENST00000434364.5&quot; 
+## [7] &quot;ENST00000612619.1&quot;</code></pre>
 <p>A more detailed list of all the output objects and content is available running:</p>
 <pre class="r"><code>?ORFquant
 ?run_ORFquant</code></pre>
 </div>
 <div id="create-a-summary-html-report" class="section level2">
 <h2>Create a summary html report</h2>
-<p>Summary plots can be obtained from the full (run on the entire transcriptome) ORFquant output. Let’s download ORFquant output and the for_ORFquant object for the entire HEK293 dataset [3].</p>
-<pre class="r"><code>download.file(&quot;https://bimsbstatic.mdc-berlin.de/ohler/Lorenzo/tests_packages/HEK293_final_SaTAnn_results&quot;,destfile = &quot;HEK293_final_ORFquant_results&quot;)
-download.file(&quot;https://bimsbstatic.mdc-berlin.de/ohler/Lorenzo/tests_packages/HEK293_Aligned.sortedByCoord.out.bam_for_SaTAnn&quot;,destfile = &quot;HEK293_for_ORFquant&quot;)</code></pre>
+<p>Summary plots can be obtained from the full (run on the entire transcriptome) ORFquant output. Let’s download the ORFquant output and the full annotation for the entire HEK293 dataset [3].</p>
+<pre class="r"><code>download.file(&quot;https://bimsbstatic.mdc-berlin.de/ohler/Lorenzo/tests_packages/HEK293_T_final_ORFquant_results&quot;,destfile = &quot;HEK293_final_ORFquant_results&quot;)
+download.file(&quot;https://bimsbstatic.mdc-berlin.de/ohler/Lorenzo/tests_packages/gencode.v25.annotation.gtf_Rannot&quot;,destfile = &quot;full_annotation_genc25_Rannot&quot;)</code></pre>
 <p>we can create summary plots (showing number of detected ORFs for different gene biotypes, statistics on ORF quantifications etc..) in <em>.pdf</em> format using:</p>
-<pre class="r"><code>plot_ORFquant_results(for_ORFquant_file = &quot;HEK293_for_ORFquant&quot;,ORFquant_output_file = &quot;HEK293_final_ORFquant_results&quot;,
-                        annotation_file = &quot;test_human.gtf_Rannot&quot;)</code></pre>
-<pre><code>## Plotting ORFquant results for HEK293_final_ORFquant_results ... Fri Apr 24 21:22:07 2020</code></pre>
-<pre><code>## Warning: Computation failed in `stat_ydensity()`:
-## replacement has 1 row, data has 0
-
-## Warning: Computation failed in `stat_ydensity()`:
-## replacement has 1 row, data has 0
-
-## Warning: Computation failed in `stat_ydensity()`:
-## replacement has 1 row, data has 0
-
-## Warning: Computation failed in `stat_ydensity()`:
-## replacement has 1 row, data has 0
-
-## Warning: Computation failed in `stat_ydensity()`:
-## replacement has 1 row, data has 0
-
-## Warning: Computation failed in `stat_ydensity()`:
-## replacement has 1 row, data has 0
-
-## Warning: Computation failed in `stat_ydensity()`:
-## replacement has 1 row, data has 0</code></pre>
-<pre><code>## Plotting ORFquant results for HEK293_final_ORFquant_results  --- Done! Fri Apr 24 21:23:03 2020</code></pre>
+<pre class="r"><code>plot_ORFquant_results(for_ORFquant_file = &quot;HEK293_for_ORFquant&quot;,ORFquant_output_file = &quot;HEK293_final_ORFquant_results&quot;,annotation_file = &quot;full_annotation_genc25_Rannot&quot;)</code></pre>
+<pre><code>## Plotting ORFquant results for HEK293_final_ORFquant_results ... Sun Apr 26 13:48:36 2020</code></pre>
+<pre><code>## Warning in regularize.values(x, y, ties, missing(ties)): collapsing to unique
+## 'x' values</code></pre>
+<pre><code>## Plotting ORFquant results for HEK293_final_ORFquant_results  --- Done! Sun Apr 26 13:51:09 2020</code></pre>
 <p>An <em>RData</em> object (*_ORFquant_plots_RData<em>) containing all the information to reproduce the plots is also created. Additionally, the plots can be embedded in a html report (with the possibility of including results from different </em>ORFquant* runs) using:</p>
 <pre class="r"><code>create_ORFquant_html_report(input_files = &quot;HEK293_final_ORFquant_results_plots/HEK293_ORFquant_plots_RData&quot;,input_sample_names = &quot;HEK2932_riboseq&quot;, output_file= &quot;HEK293_ORFquant_report.html&quot;)</code></pre>
 <pre><code>## 
@@ -785,114 +897,219 @@ download.file(&quot;https://bimsbstatic.mdc-berlin.de/ohler/Lorenzo/tests_packag
 ##  collate  en_US.UTF-8                 
 ##  ctype    en_US.UTF-8                 
 ##  tz       America/Los_Angeles         
-##  date     2020-04-24                  
+##  date     2020-04-26                  
 ## 
 ## ─ Packages ───────────────────────────────────────────────────────────────────
-##  package                       * version  date       lib source        
-##  AnnotationDbi                 * 1.48.0   2019-10-29 [1] Bioconductor  
-##  askpass                         1.1      2019-01-13 [1] CRAN (R 3.6.1)
-##  assertthat                      0.2.1    2019-03-21 [1] CRAN (R 3.6.1)
-##  backports                       1.1.5    2019-10-02 [1] CRAN (R 3.6.1)
-##  Biobase                       * 2.46.0   2019-10-29 [1] Bioconductor  
-##  BiocFileCache                   1.10.2   2019-11-08 [1] Bioconductor  
-##  BiocGenerics                  * 0.32.0   2019-10-29 [1] Bioconductor  
-##  BiocParallel                  * 1.20.1   2019-12-21 [1] Bioconductor  
-##  biomaRt                         2.42.0   2019-10-29 [1] Bioconductor  
-##  Biostrings                    * 2.54.0   2019-10-29 [1] Bioconductor  
-##  bit                             1.1-15.2 2020-02-10 [1] CRAN (R 3.6.1)
-##  bit64                           0.9-7    2017-05-08 [1] CRAN (R 3.6.1)
-##  bitops                          1.0-6    2013-08-17 [1] CRAN (R 3.6.1)
-##  blob                            1.2.1    2020-01-20 [1] CRAN (R 3.6.1)
-##  BSgenome                      * 1.54.0   2019-10-29 [1] Bioconductor  
-##  BSgenome.Human.test.genc2522M * 1.0      2020-04-25 [1] Bioconductor  
-##  callr                           3.4.2    2020-02-12 [1] CRAN (R 3.6.1)
-##  cli                             2.0.2    2020-02-28 [1] CRAN (R 3.6.1)
-##  codetools                       0.2-16   2018-12-24 [3] CRAN (R 3.6.1)
-##  colorspace                      1.4-1    2019-03-18 [1] CRAN (R 3.6.1)
-##  cowplot                       * 1.0.0    2019-07-11 [1] CRAN (R 3.6.1)
-##  crayon                          1.3.4    2017-09-16 [1] CRAN (R 3.6.1)
-##  curl                            4.3      2019-12-02 [1] CRAN (R 3.6.1)
-##  DBI                             1.1.0    2019-12-15 [1] CRAN (R 3.6.1)
-##  dbplyr                          1.4.2    2019-06-17 [1] CRAN (R 3.6.1)
-##  DelayedArray                  * 0.12.2   2020-01-06 [1] Bioconductor  
-##  desc                            1.2.0    2018-05-01 [1] CRAN (R 3.6.1)
-##  devtools                      * 2.2.2    2020-02-17 [1] CRAN (R 3.6.1)
-##  digest                          0.6.25   2020-02-23 [1] CRAN (R 3.6.1)
-##  doMC                          * 1.3.6    2019-07-27 [1] CRAN (R 3.6.1)
-##  dplyr                           0.8.5    2020-03-07 [1] CRAN (R 3.6.1)
-##  ellipsis                        0.3.0    2019-09-20 [1] CRAN (R 3.6.1)
-##  evaluate                        0.14     2019-05-28 [1] CRAN (R 3.6.1)
-##  fansi                           0.4.1    2020-01-08 [1] CRAN (R 3.6.1)
-##  farver                          2.0.3    2020-01-16 [1] CRAN (R 3.6.1)
-##  foreach                       * 1.4.8    2020-02-09 [1] CRAN (R 3.6.1)
-##  fs                              1.3.2    2020-03-05 [1] CRAN (R 3.6.1)
-##  GenomeInfoDb                  * 1.22.0   2019-10-29 [1] Bioconductor  
-##  GenomeInfoDbData                1.2.2    2020-03-10 [1] Bioconductor  
-##  GenomicAlignments             * 1.22.1   2019-11-12 [1] Bioconductor  
-##  GenomicFeatures               * 1.38.2   2020-02-15 [1] Bioconductor  
-##  GenomicFiles                  * 1.22.0   2019-10-29 [1] Bioconductor  
-##  GenomicRanges                 * 1.38.0   2019-10-29 [1] Bioconductor  
-##  ggplot2                       * 3.3.0    2020-03-05 [1] CRAN (R 3.6.1)
-##  glue                            1.3.2    2020-03-12 [1] CRAN (R 3.6.1)
-##  gridExtra                     * 2.3      2017-09-09 [1] CRAN (R 3.6.1)
-##  gtable                          0.3.0    2019-03-25 [1] CRAN (R 3.6.1)
-##  hms                             0.5.3    2020-01-08 [1] CRAN (R 3.6.1)
-##  htmltools                       0.4.0    2019-10-04 [1] CRAN (R 3.6.1)
-##  httr                            1.4.1    2019-08-05 [1] CRAN (R 3.6.1)
-##  IRanges                       * 2.20.2   2020-01-13 [1] Bioconductor  
-##  iterators                     * 1.0.12   2019-07-26 [1] CRAN (R 3.6.1)
-##  knitr                         * 1.28     2020-02-06 [1] CRAN (R 3.6.1)
-##  labeling                        0.3      2014-08-23 [1] CRAN (R 3.6.1)
-##  lattice                         0.20-40  2020-02-19 [3] CRAN (R 3.6.1)
-##  lifecycle                       0.2.0    2020-03-06 [1] CRAN (R 3.6.1)
-##  magrittr                        1.5      2014-11-22 [1] CRAN (R 3.6.1)
-##  Matrix                          1.2-18   2019-11-27 [3] CRAN (R 3.6.1)
-##  matrixStats                   * 0.56.0   2020-03-13 [1] CRAN (R 3.6.1)
-##  memoise                         1.1.0    2017-04-21 [1] CRAN (R 3.6.1)
-##  multitaper                    * 1.0-14   2017-10-25 [1] CRAN (R 3.6.1)
-##  munsell                         0.5.0    2018-06-12 [1] CRAN (R 3.6.1)
-##  openssl                         1.4.1    2019-07-18 [1] CRAN (R 3.6.1)
-##  ORFquant                      * 1.00.0   2020-04-25 [1] Bioconductor  
-##  pillar                          1.4.3    2019-12-20 [1] CRAN (R 3.6.1)
-##  pkgbuild                        1.0.6    2019-10-09 [1] CRAN (R 3.6.1)
-##  pkgconfig                       2.0.3    2019-09-22 [1] CRAN (R 3.6.1)
-##  pkgload                         1.0.2    2018-10-29 [1] CRAN (R 3.6.1)
-##  plyr                            1.8.6    2020-03-03 [1] CRAN (R 3.6.1)
-##  prettyunits                     1.1.1    2020-01-24 [1] CRAN (R 3.6.1)
-##  processx                        3.4.2    2020-02-09 [1] CRAN (R 3.6.1)
-##  progress                        1.2.2    2019-05-16 [1] CRAN (R 3.6.1)
-##  ps                              1.3.2    2020-02-13 [1] CRAN (R 3.6.1)
-##  purrr                           0.3.3    2019-10-18 [1] CRAN (R 3.6.1)
-##  R6                              2.4.1    2019-11-12 [1] CRAN (R 3.6.1)
-##  rappdirs                        0.3.1    2016-03-28 [1] CRAN (R 3.6.1)
-##  Rcpp                            1.0.4    2020-03-17 [1] CRAN (R 3.6.1)
-##  RCurl                           1.98-1.1 2020-01-19 [1] CRAN (R 3.6.1)
-##  remotes                         2.1.1    2020-02-15 [1] CRAN (R 3.6.1)
-##  reshape2                      * 1.4.3    2017-12-11 [1] CRAN (R 3.6.1)
-##  rlang                           0.4.5    2020-03-01 [1] CRAN (R 3.6.1)
-##  rmarkdown                     * 2.1      2020-01-20 [1] CRAN (R 3.6.1)
-##  rprojroot                       1.3-2    2018-01-03 [1] CRAN (R 3.6.1)
-##  Rsamtools                     * 2.2.3    2020-02-23 [1] Bioconductor  
-##  RSQLite                         2.2.0    2020-01-07 [1] CRAN (R 3.6.1)
-##  rtracklayer                   * 1.46.0   2019-10-29 [1] Bioconductor  
-##  S4Vectors                     * 0.24.3   2020-01-18 [1] Bioconductor  
-##  scales                          1.1.0    2019-11-18 [1] CRAN (R 3.6.1)
-##  sessioninfo                     1.1.1    2018-11-05 [1] CRAN (R 3.6.1)
-##  stringi                         1.4.6    2020-02-17 [1] CRAN (R 3.6.1)
-##  stringr                         1.4.0    2019-02-10 [1] CRAN (R 3.6.1)
-##  SummarizedExperiment          * 1.16.1   2019-12-19 [1] Bioconductor  
-##  testthat                        2.3.2    2020-03-02 [1] CRAN (R 3.6.1)
-##  tibble                          2.1.3    2019-06-06 [1] CRAN (R 3.6.1)
-##  tidyselect                      1.0.0    2020-01-27 [1] CRAN (R 3.6.1)
-##  usethis                       * 1.5.1    2019-07-04 [1] CRAN (R 3.6.1)
-##  VariantAnnotation               1.32.0   2019-10-29 [1] Bioconductor  
-##  vctrs                           0.2.4    2020-03-10 [1] CRAN (R 3.6.1)
-##  withr                           2.1.2    2018-03-15 [1] CRAN (R 3.6.1)
-##  xfun                            0.12     2020-01-13 [1] CRAN (R 3.6.1)
-##  XML                             3.99-0.3 2020-01-20 [1] CRAN (R 3.6.1)
-##  XVector                       * 0.26.0   2019-10-29 [1] Bioconductor  
-##  yaml                            2.2.1    2020-02-01 [1] CRAN (R 3.6.1)
-##  zlibbioc                        1.32.0   2019-10-29 [1] Bioconductor  
+##  package                       * version  date       lib
+##  AnnotationDbi                 * 1.48.0   2019-10-29 [1]
+##  askpass                         1.1      2019-01-13 [1]
+##  assertthat                      0.2.1    2019-03-21 [1]
+##  backports                       1.1.5    2019-10-02 [1]
+##  Biobase                       * 2.46.0   2019-10-29 [1]
+##  BiocFileCache                   1.10.2   2019-11-08 [1]
+##  BiocGenerics                  * 0.32.0   2019-10-29 [1]
+##  BiocParallel                  * 1.20.1   2019-12-21 [1]
+##  biomaRt                         2.42.0   2019-10-29 [1]
+##  Biostrings                    * 2.54.0   2019-10-29 [1]
+##  bit                             1.1-15.2 2020-02-10 [1]
+##  bit64                           0.9-7    2017-05-08 [1]
+##  bitops                          1.0-6    2013-08-17 [1]
+##  blob                            1.2.1    2020-01-20 [1]
+##  BSgenome                      * 1.54.0   2019-10-29 [1]
+##  BSgenome.Human.test.genc2522M * 1.0      2020-04-26 [1]
+##  callr                           3.4.2    2020-02-12 [1]
+##  cli                             2.0.2    2020-02-28 [1]
+##  codetools                       0.2-16   2018-12-24 [3]
+##  colorspace                      1.4-1    2019-03-18 [1]
+##  cowplot                       * 1.0.0    2019-07-11 [1]
+##  crayon                          1.3.4    2017-09-16 [1]
+##  curl                            4.3      2019-12-02 [1]
+##  DBI                             1.1.0    2019-12-15 [1]
+##  dbplyr                          1.4.2    2019-06-17 [1]
+##  DelayedArray                  * 0.12.2   2020-01-06 [1]
+##  desc                            1.2.0    2018-05-01 [1]
+##  devtools                      * 2.2.2    2020-02-17 [1]
+##  digest                          0.6.25   2020-02-23 [1]
+##  doMC                          * 1.3.6    2019-07-27 [1]
+##  dplyr                           0.8.5    2020-03-07 [1]
+##  ellipsis                        0.3.0    2019-09-20 [1]
+##  evaluate                        0.14     2019-05-28 [1]
+##  fansi                           0.4.1    2020-01-08 [1]
+##  farver                          2.0.3    2020-01-16 [1]
+##  foreach                       * 1.4.8    2020-02-09 [1]
+##  fs                              1.3.2    2020-03-05 [1]
+##  GenomeInfoDb                  * 1.22.0   2019-10-29 [1]
+##  GenomeInfoDbData                1.2.2    2020-03-10 [1]
+##  GenomicAlignments             * 1.22.1   2019-11-12 [1]
+##  GenomicFeatures               * 1.38.2   2020-02-15 [1]
+##  GenomicFiles                  * 1.22.0   2019-10-29 [1]
+##  GenomicRanges                 * 1.38.0   2019-10-29 [1]
+##  ggplot2                       * 3.3.0    2020-03-05 [1]
+##  glue                            1.3.2    2020-03-12 [1]
+##  gridExtra                     * 2.3      2017-09-09 [1]
+##  gtable                          0.3.0    2019-03-25 [1]
+##  hms                             0.5.3    2020-01-08 [1]
+##  htmltools                       0.4.0    2019-10-04 [1]
+##  httr                            1.4.1    2019-08-05 [1]
+##  IRanges                       * 2.20.2   2020-01-13 [1]
+##  iterators                     * 1.0.12   2019-07-26 [1]
+##  knitr                         * 1.28     2020-02-06 [1]
+##  labeling                        0.3      2014-08-23 [1]
+##  lattice                         0.20-40  2020-02-19 [3]
+##  lifecycle                       0.2.0    2020-03-06 [1]
+##  magrittr                        1.5      2014-11-22 [1]
+##  Matrix                          1.2-18   2019-11-27 [3]
+##  matrixStats                   * 0.56.0   2020-03-13 [1]
+##  memoise                         1.1.0    2017-04-21 [1]
+##  multitaper                    * 1.0-14   2017-10-25 [1]
+##  munsell                         0.5.0    2018-06-12 [1]
+##  openssl                         1.4.1    2019-07-18 [1]
+##  ORFquant                      * 0.99.0   2020-04-26 [1]
+##  pillar                          1.4.3    2019-12-20 [1]
+##  pkgbuild                        1.0.6    2019-10-09 [1]
+##  pkgconfig                       2.0.3    2019-09-22 [1]
+##  pkgload                         1.0.2    2018-10-29 [1]
+##  plyr                            1.8.6    2020-03-03 [1]
+##  prettyunits                     1.1.1    2020-01-24 [1]
+##  processx                        3.4.2    2020-02-09 [1]
+##  progress                        1.2.2    2019-05-16 [1]
+##  ps                              1.3.2    2020-02-13 [1]
+##  purrr                           0.3.3    2019-10-18 [1]
+##  R6                              2.4.1    2019-11-12 [1]
+##  rappdirs                        0.3.1    2016-03-28 [1]
+##  Rcpp                            1.0.4    2020-03-17 [1]
+##  RCurl                           1.98-1.1 2020-01-19 [1]
+##  remotes                         2.1.1    2020-02-15 [1]
+##  reshape2                      * 1.4.3    2017-12-11 [1]
+##  rlang                           0.4.5    2020-03-01 [1]
+##  rmarkdown                     * 2.1      2020-01-20 [1]
+##  rprojroot                       1.3-2    2018-01-03 [1]
+##  Rsamtools                     * 2.2.3    2020-02-23 [1]
+##  RSQLite                         2.2.0    2020-01-07 [1]
+##  rtracklayer                   * 1.46.0   2019-10-29 [1]
+##  S4Vectors                     * 0.24.3   2020-01-18 [1]
+##  scales                          1.1.0    2019-11-18 [1]
+##  sessioninfo                     1.1.1    2018-11-05 [1]
+##  stringi                         1.4.6    2020-02-17 [1]
+##  stringr                         1.4.0    2019-02-10 [1]
+##  SummarizedExperiment          * 1.16.1   2019-12-19 [1]
+##  testthat                        2.3.2    2020-03-02 [1]
+##  tibble                          2.1.3    2019-06-06 [1]
+##  tidyselect                      1.0.0    2020-01-27 [1]
+##  usethis                       * 1.5.1    2019-07-04 [1]
+##  VariantAnnotation               1.32.0   2019-10-29 [1]
+##  vctrs                           0.2.4    2020-03-10 [1]
+##  withr                           2.1.2    2018-03-15 [1]
+##  xfun                            0.12     2020-01-13 [1]
+##  XML                             3.99-0.3 2020-01-20 [1]
+##  XVector                       * 0.26.0   2019-10-29 [1]
+##  yaml                            2.2.1    2020-02-01 [1]
+##  zlibbioc                        1.32.0   2019-10-29 [1]
+##  source                             
+##  Bioconductor                       
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  Bioconductor                       
+##  Bioconductor                       
+##  Bioconductor                       
+##  Bioconductor                       
+##  Bioconductor                       
+##  Bioconductor                       
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  Bioconductor                       
+##  Bioconductor                       
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  Bioconductor                       
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  Bioconductor                       
+##  Bioconductor                       
+##  Bioconductor                       
+##  Bioconductor                       
+##  Bioconductor                       
+##  Bioconductor                       
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  Bioconductor                       
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  Github (lcalviell/ORFquant@2a33a40)
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  Bioconductor                       
+##  CRAN (R 3.6.1)                     
+##  Bioconductor                       
+##  Bioconductor                       
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  Bioconductor                       
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  Bioconductor                       
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  CRAN (R 3.6.1)                     
+##  Bioconductor                       
+##  CRAN (R 3.6.1)                     
+##  Bioconductor                       
 ## 
 ## [1] /bfd/lcalviel/R/x86_64-pc-linux-gnu-library/3.6
 ## [2] /usr/local/lib/R/site-library

@@ -127,7 +127,6 @@ download.file("https://ucsf.box.com/shared/static/g9uupr9c4is54e5cygcdzumh4jl915
 ```
 
 There are two ways to prepare the input file for *ORFquant*: the recommended one is to use *Ribo-seQC* [2], which automatically output a "*for_ORFquant" file together with many other statistics about the alignment.
-
 As an alternative, we can use the *prepare_for_ORFquant* function, supplied with the bam file together with a text file specifying read lengths and cutoffs to use (as well as information about their possible organelle of origin [2]):
 
 ```{r prepare2}
@@ -139,14 +138,15 @@ Additionally, users can input their custom P_sites track using other options in 
 
 ## Run ORFquant
 
-We can now run ORFquant using the annotation and the *for_ORFquant* file we created.
+We can now run ORFquant using the annotation and the *for_ORFquant* file.
 ORFquant can be run on a specific list of genes, or (**recommended!**) on the entire set of possible transcripts. We strongly recommend running ORFquant on the entire transcriptome, to check the overall validity of its results (see next section).
 
-**NOTE:** We recommend to run ORFquant on an HPC cluster. On average, using 7 cores with 10G of RAM per core will take ~12 hours to run the pipeline on the entire transcriptome.
+**NOTE:** We recommend to run ORFquant on an HPC cluster. On average, using 6 cores with 20G of RAM will take ~10 hours to run the pipeline on the entire transcriptome.
 
 ```{r run_1}
-run_ORFquant(for_ORFquant_file = "test_human_hek.bam_for_ORFquant",
-           annotation_file = "test_human.gtf_Rannot",n_cores = 1,gene_name =c("MIEF1","DRG2"))
+download.file("https://bimsbstatic.mdc-berlin.de/ohler/Lorenzo/tests_packages/HEK293_Aligned.sortedByCoord.out.bam_for_ORFquant",destfile = "HEK293_for_ORFquant")
+run_ORFquant(for_ORFquant_file = "HEK293_for_ORFquant",
+           annotation_file = "test_human.gtf_Rannot",n_cores = 1,gene_name =c("MIEF1","IL17RA"))
 ```
 
 This will produce different files, such as annotation in .gtf format for the *de-novo* identified ORFs or protein sequences in .fasta format.
@@ -193,18 +193,17 @@ A more detailed list of all the output objects and content is available running:
 ## Create a summary html report
 
 Summary plots can be obtained from the full (run on the entire transcriptome) ORFquant output.
-Let's download ORFquant output and the for_ORFquant object for the entire HEK293 dataset [3].
+Let's download the ORFquant output and the full annotation for the entire HEK293 dataset [3].
 
 ```{r summary1}
-download.file("https://bimsbstatic.mdc-berlin.de/ohler/Lorenzo/tests_packages/HEK293_final_SaTAnn_results",destfile = "HEK293_final_ORFquant_results")
-download.file("https://bimsbstatic.mdc-berlin.de/ohler/Lorenzo/tests_packages/HEK293_Aligned.sortedByCoord.out.bam_for_SaTAnn",destfile = "HEK293_for_ORFquant")
+download.file("https://bimsbstatic.mdc-berlin.de/ohler/Lorenzo/tests_packages/HEK293_T_final_ORFquant_results",destfile = "HEK293_final_ORFquant_results")
+download.file("https://bimsbstatic.mdc-berlin.de/ohler/Lorenzo/tests_packages/gencode.v25.annotation.gtf_Rannot",destfile = "full_annotation_genc25_Rannot")
 ```
 
 we can create summary plots (showing number of detected ORFs for different gene biotypes, statistics on ORF quantifications etc..) in *.pdf* format using:
 
 ```{r summary2}
-plot_ORFquant_results(for_ORFquant_file = "HEK293_for_ORFquant",ORFquant_output_file = "HEK293_final_ORFquant_results",
-                        annotation_file = "test_human.gtf_Rannot")
+plot_ORFquant_results(for_ORFquant_file = "HEK293_for_ORFquant",ORFquant_output_file = "HEK293_final_ORFquant_results",annotation_file = "full_annotation_genc25_Rannot")
 ```
 
 An *RData* object (*_ORFquant_plots_RData*) containing all the information to reproduce the plots is also created.
@@ -231,4 +230,3 @@ The html report can be opened by different browsers such as Firefox or Chrome.
 ```{r end_sessinf}
 session_info()
 ```
-
