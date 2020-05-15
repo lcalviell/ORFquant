@@ -1,13 +1,39 @@
 Package: ORFquant
-Title: Splice-aware Quantification of ORF translation
-Author: Lorenzo Calviello [aut,cre], Uwe Ohler [rev,fnd]
-Maintainer: Lorenzo Calviello <calviello.l.bio@gmail.com>
-Description: SaTAnn is a method that annotates and quantifies translation at the single ORF level using Ribo-seq data.
-Depends: rtracklayer, BSgenome, devtools, Biostrings, GenomicFeatures, foreach, doMC, multitaper, GenomicAlignments, GenomicFiles, reshape2, ggplot2, cowplot, grid, BiocGenerics, knitr, gridExtra, rmarkdown
+Title: Splice-Aware Translatome Annotation
+Version: 1.00.0
+Authors@R: 
+    person(given = "First",
+           family = "Last",
+           role = c("aut", "cre"),
+           email = "first.last@example.com",
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: ORFquant is a method that annotates and quantifies
+    translation at the single ORF level using Ribo-seq data.
 License: GPL-3 or above
+Depends: 
+    BiocGenerics,
+    Biostrings,
+    BSgenome,
+    cowplot,
+    devtools,
+    doMC,
+    foreach,
+    GenomicAlignments,
+    GenomicFeatures,
+    GenomicFiles,
+    ggplot2,
+    grid,
+    gridExtra,
+    knitr,
+    multitaper,
+    reshape2,
+    rmarkdown,
+    rtracklayer
+Authors: c(person("Lorenzo", "Calviello", email =
+    "calviello.l.bio@gmail.com", role = c("aut","cre")), person("Uwe",
+    "Ohler", email = "Uwe.Ohler@mdc-berlin.de", role = c("rev","fnd")))
+biocViews: RiboSeq, GenomeAnnotation, Transcriptomics, Software
 Encoding: UTF-8
 LazyData: FALSE
-biocViews: RiboSeq, GenomeAnnotation, Transcriptomics, Software
 Name: ORFquant
-Version: 0.99.0
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.0
