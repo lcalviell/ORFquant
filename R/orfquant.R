@@ -3356,8 +3356,12 @@ run_ORFquant<-function(for_ORFquant_file,annotation_file,n_cores,prefix=for_ORFq
 
 load_annotation<-function(path){
     GTF_annotation<-get(load(path))
-    library(GTF_annotation$genome_package,character.only = T)
-    genome_sequence<-get(GTF_annotation$genome_package)
+    if(is(GTF_annotation$genome,'FaFile')){
+        genome_sequence <- GTF_annotation$genome            
+    }else{
+        library(GTF_annotation$genome_package,character.only = T)
+        genome_sequence<-get(GTF_annotation$genome_package)
+    }
     GTF_annotation<<-GTF_annotation
     genome_seq<<-genome_sequence
 }
