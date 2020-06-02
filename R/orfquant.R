@@ -5786,7 +5786,8 @@ plot_orfquant_locus<-function(locus,orfquant_results, bam_files=NULL,plotfile='l
     seltxs <- orfs_quantified_gen$transcript_id%>%unique
     orfs_quantified_gen$feature <- 'CDS'
     orfs_quantified_gen$transcript=orfs_quantified_gen$transcript_id
-    orfs_quantified_tr <- anno$exons_tx%>%.[unique(orfs_quantified_gen$transcript_id)]
+    orfs_quantified_tr <- anno$exons_tx
+    orfs_quantified_tr <- orfs_quantified_tr[unique(orfs_quantified_gen$transcript_id)]
     #get the orfs, then get the negative coverage
     #add transcript info to the ORFs_tx object
     seqinf <- Seqinfo(names(anno$exons_tx),anno$exons_tx%>%width%>%sum)
@@ -5796,6 +5797,7 @@ plot_orfquant_locus<-function(locus,orfquant_results, bam_files=NULL,plotfile='l
         as('GRanges')%>%subset(score==0)%>%mapFromTranscripts(anno$exons_tx)%>%
         {.$transcript <- names(anno$exons_tx)[.$transcriptsHits];.}%>%
         {.$feature='utr';.}
+
     orfquantgr <- c(
         orfs_quantified_gen[,c('feature','transcript')]
         ,utrs[,c('feature','transcript')]
@@ -5822,7 +5824,7 @@ plot_orfquant_locus<-function(locus,orfquant_results, bam_files=NULL,plotfile='l
         }%>%
         {.$transcript <- names(anno$exons_tx)[.$transcriptsHits];.}%>%
         {.$feature=ifelse(.$score==0,'utr','CDS');.}
-    disc_orfquantgr %<>% c(.,anno$cds_txs[disctxs]%>%unlist%>%{.$feature=rep('CDS',length(.));.$transcript=names(.);.})
+    disc_orfquantgr <- disc_orfquantgr%>% c(.,anno$cds_txs[disctxs]%>%unlist%>%{.$feature=rep('CDS',length(.));.$transcript=names(.);.})
     discORFnames<-paste0(disctxs,'_',start(anno$cds_txs_coords[disctxs]),'_',end(anno$cds_txs_coords[disctxs]))%>%setNames(disctxs)
     disc_orfquantgr$symbol = discORFnames[disc_orfquantgr$transcript]
     fakejreads <- riboseqcoutput$junctions%>%subset(any(gene_id==selgene))%>%resize(width(.)+2,'center')%>%
@@ -5830,25 +5832,6 @@ plot_orfquant_locus<-function(locus,orfquant_results, bam_files=NULL,plotfile='l
     fakejreads <- fakejreads[map2(seq_along(fakejreads[]),fakejreads$reads,rep)%>%unlist]
     ncols <- 2
     nrows <- 1
-    grid.newpage()
-    pushViewport(viewport(layout=grid.layout(nrows, ncols)))
-    pushViewport(viewport(layout.pos.col=1, layout.pos.row=+1))
-    plotTracks(list(itrack, maTrack, mdTrack, mgTrack), chromosome=chroms[i], add=TRUE)
-    popViewport(1)
-    pushViewport(viewport(layout.pos.col=2, layout.pos.row=+1))
-    plot(1)
-    popViewport(1)
-    pdf(plotfile)
-    pushViewport(vp1)
-    grid.text("Some drawing in graphics region 1", y = 0.8)
-    upViewport()
-    pushViewport(vp2)
-    grid.text("Some drawing in graphics region 2", y = 0.8)
-    upViewport()
-    downViewport("vp1")
-    grid.text("MORE drawing in graphics region 1", y = 0.2)
-    popViewport()
-    dev.off()
     orfcols <- orfcols[order(-orfscores[names(orfcols)])]
     orfquantgr_sorted <- orfquantgr[order(orfscores[names(orfquantgr)])]
     fix_utrs <- function(orfquantgr_sorted){
@@ -5869,11 +5852,13 @@ plot_orfquant_locus<-function(locus,orfquant_results, bam_files=NULL,plotfile='l
     orfquantgr_sorted<-fix_utrs(orfquantgr_sorted)
     # disc_orfquantgrfix<-fix_utrs(disc_orfquantgr)
     disc_orfquantgrfix<-(disc_orfquantgr)
-    #
+    #dimenions, extent of the plot
     plotstart = start(selgenerange) - (0.2 * (end(selgenerange)-start(selgenerange)))
     plotend = end(selgenerange) + (0 * (end(selgenerange)-start(selgenerange)))
     library(Gviz)
     legendwidth=1/10
+    plottitle <- paste0('ORFquant: ',selgene)
+    #write to pdf
     pdf(plotfile,width=14+2,h=7)
     #code for arranging legend next to the locus plot
     grid.newpage()
@@ -5883,9 +5868,8 @@ plot_orfquant_locus<-function(locus,orfquant_results, bam_files=NULL,plotfile='l
     just = c("left", "bottom"))
     vp3 <- viewport(x = 1-legendwidth*1.5, y = 0, w = legendwidth*1.5, h = 1/7,
     just = c("left", "bottom"))
-    # pushViewport(viewport(x = 0, y = 0, w = 1, h = 1,just = c("left", "bottom"), name = "all"))
     pushViewport(vp1)
-    plottitle <- paste0('ORFquant: ',selgene)
+    #finally plot the locus
     plotTracks(main=plottitle,cex.main=2,legend=TRUE,add=TRUE,
     from=plotstart,to=plotend,#zoomed in on the orf in question
     sizes=c(1,1,1,1,1,1,1),rot.title=0,cex.title=1,title.width=2.5,
@@ -5908,22 +5892,14 @@ plot_orfquant_locus<-function(locus,orfquant_results, bam_files=NULL,plotfile='l
                 range=orfquantgr_sorted,collapse=FALSE,
             thinBoxFeature='utr',CDS='red',utr='white',
             transcriptAnnotation='symbol'
-            # id=orfquantgr_sorted$symbol
         )%>%
         # identity
         {displayPars(.)[names(orfcols)]<-orfcols;.}
     ),
-    # transcriptAnnotation="transcript",
     col.labels='black',
     chr=seqnames(selgenerange)
     )
-    tmp<-GeneRegionTrack(name='Selected\nORFs',
-                orfquantgr_sorted%>%{.$symbol='foo';.},collapse=FALSE,
-            thinBoxFeature='utr',CDS='red',utr='white',
-            showId=TRUE,transcriptAnnotation='symbol',col='black',
-            id=orfquantgr_sorted$feature
-        )
-    # upViewport()
+    #create barchart of intensities
     popViewport(1)
     pushViewport(vp2)
     cols = I(c(orfcols[which.min(orfscores)],orfcols[which.max(orfscores)]))
@@ -5936,14 +5912,7 @@ plot_orfquant_locus<-function(locus,orfquant_results, bam_files=NULL,plotfile='l
     pushViewport(vp3)
     dev.off()
     normalizePath(plotfile)
-    # plotfile <- 'colscale.pdf'
-    # pdf(plotfile,width=4,height=4)
-    # data.frame(orf = unique(names(orfquantgr)),score=unique(orfquantgrscores))%>%filter(!is.na(score))%>%
-    #     mutate(col=orfcols[as.character(orf)])%>%
-    #     ggplot(aes(x=orf,fill=I(col),color=I('black'),y=score,ymin=0))+stat_identity(geom='bar')+scale_y_continuous(limits= c(0,max(na.omit(orfquantgrscores))))+
-    #     theme(axis.text.x=element_text(angle=45,vjust=0.5))
-    # dev.off()
-    # normalizePath(plotfile)
+    #return file name
     return(plotfile)
 } 
 }
