@@ -3445,8 +3445,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file=NULL,gtf_fil
                  The following files don't exist:\n",
                  f, "\n")
         }
-        }
-    }
+     }
     
    
     if(forge_BSgenome){
@@ -5915,4 +5914,3 @@ plot_orfquant_locus<-function(locus,orfquant_results, bam_files=NULL,plotfile='l
     #return file name
     return(plotfile)
 } 
-}
