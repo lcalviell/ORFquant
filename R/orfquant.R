@@ -4652,7 +4652,7 @@ prepare_for_ORFquant<-function(annotation_file,bam_file,path_to_rl_cutoff_file=N
     cat(paste("Calculating P-sites positions and junctions --- Done!", date(),"\n"))
     
     save(for_ORFquant,file = paste(dest_name,"for_ORFquant",sep = "_"))
-    
+    paste(dest_name,"for_ORFquant",sep = "_")
 }
 
 
