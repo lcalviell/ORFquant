@@ -5725,3 +5725,200 @@ create_ORFquant_html_report <- function(input_files, input_sample_names, output_
                             output_file = output_file))
     sink()
 }
+
+
+#' Create a plot of the ORFquant results at a locus
+#'
+#' Create a plot of the ORFquant results at a locus. Uses the info form the orfquant results about where the psite data is located.
+#' 
+#' @keywords ORFquant
+#' @author Lorenzo Calviello, \email{calviello.bio@@gmail.com}
+#' 
+#' @param input_files Character vector with full paths to plot files (*ORFquant_plots_RData) 
+#' generated with \code{plot_ORFquant_results}. 
+#' Must be of same length as \code{input_sample_names}.
+#' 
+#' @param input_sample_names Character vector containing input names.
+#' Must be of same length as \code{input_files}.
+#' 
+#' @param locus String; a gene name, must be present in names(orfquant_results$ORFs_gen)
+#' @param orfquant_results A list containing processed output from ORFquant
+#' @param bam_files bam files, (or pre-processed bam data from RiboseQC) to be plotted
+#' @param plotfile the file into which the plot will be saved as a pdf
+#' @return returns the value of plotfile if successfull.
+#' @export
+plot_orfquant_locus<-function(locus,orfquant_results, bam_files=NULL,plotfile='locusplot.pdf', col ='green' ){
+    
+    if(!is.null(orfquant_results$psite_data_file)){stop("this object looks like it's form an old version of ORFquant, it doesn't list the psite data file")}
+    if(length(orfquant_results$psite_data_file)>1){stop("locus plots aren't supported for multiple psite tracks - either unify the psite tracks or modify the input object to have only one track")}
+    riboseqcoutput<-get(load(orfquant_results$psite_data_file))
+    selgene <- locus
+    stopifnot(length(locus)==1)
+    stopifnot(locus %in% names(orfquant_results$ORFs_gen))
+    orfs_quantified_gen <-  orfquant_results$ORFs_gen%>%subset(.,str_detect(names(.),selgene))
+    orfquantgrscores = orfs_quantified_gen$TrP_pNpM[match(names(orfquantgr),orfs_quantified_gen$ORF_id_tr)]
+    mcols(orfs_quantified_gen) <- mcols(orfquant_results$ORFs_tx)[match(names(orfs_quantified_gen),orfquant_results$ORFs_tx$ORF_id_tr),]
+    seltxs <- orfs_quantified_gen$transcript_id%>%unique
+    orfs_quantified_gen$feature <- 'CDS'
+    orfs_quantified_gen$transcript=orfs_quantified_gen$transcript_id
+    orfs_quantified_tr <- anno$exons_tx%>%.[unique(orfs_quantified_gen$transcript_id)]
+    #get the orfs, then get the negative coverage
+    #add transcript info to the ORFs_tx object
+    seqinf <- Seqinfo(names(anno$exons_tx),anno$exons_tx%>%width%>%sum)
+    #Now get the negatives for each ORF
+    utrs <- orfquant_results$ORFs_tx%>%subset(gene_id==selgene)%>%keepSeqlevels(seltxs)%>%{seqinfo(.)<-seqinf[seltxs];.}%>%
+        coverage%>%
+        as('GRanges')%>%subset(score==0)%>%mapFromTranscripts(anno$exons_tx)%>%
+        {.$transcript <- names(anno$exons_tx)[.$transcriptsHits];.}%>%
+        {.$feature='utr';.}
+    orfquantgr <- c(
+        orfs_quantified_gen[,c('feature','transcript')]
+        ,utrs[,c('feature','transcript')]
+    )
+    orfquantgr$feature[orfquantgr$feature=='CDS'] <- names(orfquantgr)[orfquantgr$feature=='CDS']
+    #get correct col name
+    if('ORF_pM' %in% metacols) quantcol = 'ORF_pM' else quantcol = 'TrP_pNpM'
+    orfscores<- orfquantgr$feature%>%unique%>%setNames(match(.,orfs_quantified_gen$ORF_id_tr)%>%orfs_quantified_gen[[quantcol]][.],.)
+    orfcols <- orfscores%>%{./max(na.omit(.))}%>%
+        c(0,.)%>%
+        map_chr(~possibly(rgb,'white')(0,.,0))%>%setNames(c('0',orfquantgr$feature%>%unique))
+    ###Define non selected
+    disctxs<-anno$txs_gene[selgene]%>%unlist%>%.$tx_name%>%unique%>%setdiff(seltxs)
+    disc_orfquantgr <- anno$cds_txs_coords%>%
+        keepSeqlevels(disctxs,'coarse')%>%
+        {seqinfo(.)<-seqinf[disctxs];.}%>%  coverage%>%
+        as('GRanges')%>%
+        subset(.$score==0)%>%
+        {   
+            txgr = .
+            out = mapFromTranscripts(txgr,anno$exons_tx)
+            out$score = txgr$score[out$xHits]
+            out
+        }%>%
+        {.$transcript <- names(anno$exons_tx)[.$transcriptsHits];.}%>%
+        {.$feature=ifelse(.$score==0,'utr','CDS');.}
+    disc_orfquantgr %<>% c(.,anno$cds_txs[disctxs]%>%unlist%>%{.$feature=rep('CDS',length(.));.$transcript=names(.);.})
+    discORFnames<-paste0(disctxs,'_',start(anno$cds_txs_coords[disctxs]),'_',end(anno$cds_txs_coords[disctxs]))%>%setNames(disctxs)
+    disc_orfquantgr$symbol = discORFnames[disc_orfquantgr$transcript]
+    fakejreads <- riboseqcoutput$junctions%>%subset(any(gene_id==selgene))%>%resize(width(.)+2,'center')%>%
+        {.$cigar <- paste0('1M',width(.)-2,'N','1M');.}
+    fakejreads <- fakejreads[map2(seq_along(fakejreads[]),fakejreads$reads,rep)%>%unlist]
+    ncols <- 2
+    nrows <- 1
+    grid.newpage()
+    pushViewport(viewport(layout=grid.layout(nrows, ncols)))
+    pushViewport(viewport(layout.pos.col=1, layout.pos.row=+1))
+    plotTracks(list(itrack, maTrack, mdTrack, mgTrack), chromosome=chroms[i], add=TRUE)
+    popViewport(1)
+    pushViewport(viewport(layout.pos.col=2, layout.pos.row=+1))
+    plot(1)
+    popViewport(1)
+    pdf(plotfile)
+    pushViewport(vp1)
+    grid.text("Some drawing in graphics region 1", y = 0.8)
+    upViewport()
+    pushViewport(vp2)
+    grid.text("Some drawing in graphics region 2", y = 0.8)
+    upViewport()
+    downViewport("vp1")
+    grid.text("MORE drawing in graphics region 1", y = 0.2)
+    popViewport()
+    dev.off()
+    orfcols <- orfcols[order(-orfscores[names(orfcols)])]
+    orfquantgr_sorted <- orfquantgr[order(orfscores[names(orfquantgr)])]
+    fix_utrs <- function(orfquantgr_sorted){
+        orfquantgr_sorted$symbol = names(orfquantgr_sorted)
+        #add utrs for each ORF
+        #for each selected ORF
+        orftrpairs<-orfquantgr_sorted%>%subset(feature!='utr')%>%mcols%>%as.data.frame%>%distinct
+        orfutrs <- orfquantgr_sorted%>%subset(feature=='utr')
+        orfutrs<-lapply(1:nrow(orftrpairs),function(i){
+            orfutrs <- orfutrs%>%subset(transcript==orftrpairs$transcript[i])
+            orfutrs$symbol = orftrpairs$feature[i]
+            names(orfutrs) = orfutrs$symbol 
+            orfutrs
+        })%>%GRangesList%>%unlist
+        orfquantgr_sorted<-orfquantgr_sorted%>%subset(feature!='utr')%>%c(.,orfutrs)
+        orfquantgr_sorted
+    }
+    orfquantgr_sorted<-fix_utrs(orfquantgr_sorted)
+    # disc_orfquantgrfix<-fix_utrs(disc_orfquantgr)
+    disc_orfquantgrfix<-(disc_orfquantgr)
+    #
+    plotstart = start(selgenerange) - (0.2 * (end(selgenerange)-start(selgenerange)))
+    plotend = end(selgenerange) + (0 * (end(selgenerange)-start(selgenerange)))
+    library(Gviz)
+    legendwidth=1/10
+    pdf(plotfile,width=14+2,h=7)
+    #code for arranging legend next to the locus plot
+    grid.newpage()
+    vp1 <- viewport(x = 0, y = 0, w = 1-legendwidth*1.5, h = 1,
+    just = c("left", "bottom"), name = "vp1")
+    vp2 <- viewport(x = 1-legendwidth*1.5, y = 0, w = legendwidth*1.5, h = 1,
+    just = c("left", "bottom"))
+    vp3 <- viewport(x = 1-legendwidth*1.5, y = 0, w = legendwidth*1.5, h = 1/7,
+    just = c("left", "bottom"))
+    # pushViewport(viewport(x = 0, y = 0, w = 1, h = 1,just = c("left", "bottom"), name = "all"))
+    pushViewport(vp1)
+    plottitle <- paste0('ORFquant: ',selgene)
+    plotTracks(main=plottitle,cex.main=2,legend=TRUE,add=TRUE,
+    from=plotstart,to=plotend,#zoomed in on the orf in question
+    sizes=c(1,1,1,1,1,1,1),rot.title=0,cex.title=1,title.width=2.5,
+    c(
+        GenomeAxisTrack(range=selgenerange),
+        # rnaseqtrack, # plot the riboseq signal
+        # txs_discarded_Track,
+        # txs_selected_track,
+        # DataTrack(riboseqcoutput$P_sites_all%>%subsetByOverlaps(selgenerange),type='hist'),
+        GeneRegionTrack(name='discarded\ntranscripts',anno$exons_tx[disctxs]%>%unlist%>%{.$transcript=names(.);.$feature=rep('exon',length(.));.},fill='#F7CAC9',
+                transcriptAnnotation='transcript'),
+        GeneRegionTrack(exon='forestgreen',name='selected\ntranscripts',anno$exons_tx[seltxs]%>%unlist%>%{.$transcript=names(.);.$feature=rep('exon',length(.));.},fill='#F7CAC9',
+                transcriptAnnotation='transcript'),
+        DataTrack(legend=TRUE,name='\t\t P-Sites',col.histogram='forestgreen',riboseqcoutput$P_sites_all%>%subsetByOverlaps(selgenerange),type='hist'),
+        AlignmentsTrack(name='\nJunction Reads\n\n\n',col.sashimi='forestgreen',fakejreads[,'cigar'],type='sashimi',sashimiNumbers=TRUE),
+        # GeneRegionTrack(discarded_orfs_gen),
+        GeneRegionTrack(name='Discarded\nORFs',disc_orfquantgrfix,
+            transcriptAnnotation='symbol',collapse=FALSE,thinBoxFeature='utr',CDS='blue',utr='white'),
+        GeneRegionTrack(name='Selected\nORFs',
+                range=orfquantgr_sorted,collapse=FALSE,
+            thinBoxFeature='utr',CDS='red',utr='white',
+            transcriptAnnotation='symbol'
+            # id=orfquantgr_sorted$symbol
+        )%>%
+        # identity
+        {displayPars(.)[names(orfcols)]<-orfcols;.}
+    ),
+    # transcriptAnnotation="transcript",
+    col.labels='black',
+    chr=seqnames(selgenerange)
+    )
+    tmp<-GeneRegionTrack(name='Selected\nORFs',
+                orfquantgr_sorted%>%{.$symbol='foo';.},collapse=FALSE,
+            thinBoxFeature='utr',CDS='red',utr='white',
+            showId=TRUE,transcriptAnnotation='symbol',col='black',
+            id=orfquantgr_sorted$feature
+        )
+    # upViewport()
+    popViewport(1)
+    pushViewport(vp2)
+    cols = I(c(orfcols[which.min(orfscores)],orfcols[which.max(orfscores)]))
+    grid.draw(g_legend(qplot(x=1:2,y=1:2,color=range(orfscores,na.rm=T))+
+    scale_color_gradient(name='Normalized ORF Expr\n(ORFs_pM)',
+        breaks = setNames(sort(na.omit(orfscores)),floor(na.omit(sort(orfscores)))%>% format(big.mark=",",scientific=FALSE) ),
+        low=cols[1],high=cols[2])+theme(text=element_text(size=14),legend.key.size=unit(.5,'inches'))
+    ))
+    popViewport(1)
+    pushViewport(vp3)
+    dev.off()
+    normalizePath(plotfile)
+    # plotfile <- 'colscale.pdf'
+    # pdf(plotfile,width=4,height=4)
+    # data.frame(orf = unique(names(orfquantgr)),score=unique(orfquantgrscores))%>%filter(!is.na(score))%>%
+    #     mutate(col=orfcols[as.character(orf)])%>%
+    #     ggplot(aes(x=orf,fill=I(col),color=I('black'),y=score,ymin=0))+stat_identity(geom='bar')+scale_y_continuous(limits= c(0,max(na.omit(orfquantgrscores))))+
+    #     theme(axis.text.x=element_text(angle=45,vjust=0.5))
+    # dev.off()
+    # normalizePath(plotfile)
+    return(plotfile)
+} 
+}
