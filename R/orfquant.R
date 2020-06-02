@@ -3339,7 +3339,8 @@ run_ORFquant<-function(for_ORFquant_file,annotation_file,n_cores,prefix=for_ORFq
         ORFquant_results<<-ORFquant_results
     }
     cat(paste("Exporting ORFquant results --- Done! ",date(),"\n",sep = ""))
-    
+    ORFquant_results$psite_data_file <- for_ORFquant_file
+    ORFquant_results   
 }
 
 
