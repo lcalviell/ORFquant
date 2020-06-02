@@ -3422,8 +3422,10 @@ load_annotation<-function(path){
 #' @export
 
 prepare_annotation_files<-function(annotation_directory,twobit_file=NULL,gtf_file,scientific_name="Homo.sapiens",annotation_name="genc25",export_bed_tables_TxDb=TRUE,forge_BSgenome=TRUE,genome_seq=NULL,circ_chroms=DEFAULT_CIRC_SEQS,create_TxDb=TRUE){
-
-
+    if(!is.null(genome_seq)){
+        forge_BSgenome=FALSE
+        message('fasta file passed - cancelling BSgenome creation')
+    }
   
     DEFAULT_CIRC_SEQS <- unique(c("chrM","MT","MtDNA","mit","Mito","mitochondrion",
                                   "dmel_mitochondrion_genome","Pltd","ChrC","Pt","chloroplast",
@@ -3447,7 +3449,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file=NULL,gtf_fil
         }
      }
     
-   
+    
     if(forge_BSgenome){
 
     scientific_name_spl<-strsplit(scientific_name,"[.]")[[1]]
