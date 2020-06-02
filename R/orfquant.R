@@ -3378,6 +3378,8 @@ load_annotation<-function(path){
 #' @param annotation_name A name to give to annotation used; defaults to genc25
 #' @param export_bed_tables_TxDb Export coordinates and info about different genomic regions in the annotation_directory? It defaults to \code{TRUE}
 #' @param forge_BSgenome Forge and install a \code{BSgenome} package? It defaults to \code{TRUE}
+#' @param genome_seq Fasta file to use for genome seq if not forging a BSgenome package
+#' @param circ_chroms Chromosomes to make circular in the genome sequence - defaults to DEFAULT_CIRC_SEQS
 #' @param create_TxDb Create a \code{TxDb} object and a *Rannot object? It defaults to \code{TRUE}
 #' @details This function uses the \code{makeTxDbFromGFF} function to  create a TxDb object and extract
 #' genomic regions and other info to a *Rannot R file; the \code{mapToTranscripts} and \code{mapFromTranscripts} functions are used to 
@@ -3415,30 +3417,36 @@ load_annotation<-function(path){
 #' @seealso \code{\link{load_annotation}}, \code{\link{forgeBSgenomeDataPkg}}, \code{\link{makeTxDbFromGFF}}, \code{\link{run_ORFquant}}.
 #' @export
 
-prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,scientific_name="Homo.sapiens",annotation_name="genc25",export_bed_tables_TxDb=T,forge_BSgenome=T,create_TxDb=T){
-    
-    
+prepare_annotation_files<-function(annotation_directory,twobit_file=NULL,gtf_file,scientific_name="Homo.sapiens",annotation_name="genc25",export_bed_tables_TxDb=TRUE,forge_BSgenome=TRUE,genome_seq=NULL,circ_chroms=DEFAULT_CIRC_SEQS,create_TxDb=TRUE){
+
+
+  
     DEFAULT_CIRC_SEQS <- unique(c("chrM","MT","MtDNA","mit","Mito","mitochondrion",
                                   "dmel_mitochondrion_genome","Pltd","ChrC","Pt","chloroplast",
                                   "Chloro","2micron","2-micron","2uM",
                                   "Mt", "NC_001879.2", "NC_006581.1","ChrM","mitochondrion_genome"))
+
     #adjust variable names (some chars not permitted)
     annotation_name<-gsub(annotation_name,pattern = "_",replacement = "")
     annotation_name<-gsub(annotation_name,pattern = "-",replacement = "")
-    if(!dir.exists(annotation_directory)){dir.create(path = annotation_directory,recursive = T)}
+    if(!dir.exists(annotation_directory)){dir.create(path = annotation_directory,recursive = TRUE)}
     annotation_directory<-normalizePath(annotation_directory)
-    twobit_file<-normalizePath(twobit_file)
     gtf_file<-normalizePath(gtf_file)
-    
-    for (f in c(twobit_file,gtf_file)){
+
+    filestotest <- c(gtf_file)
+    if(forge_BSgenome) filestotest <- c(filestotest,twobit_file)
+    for (f in filestotest){
         if(file.access(f, 0)==-1) {
             stop("
                  The following files don't exist:\n",
                  f, "\n")
         }
+        }
     }
     
-    
+   
+    if(forge_BSgenome){
+
     scientific_name_spl<-strsplit(scientific_name,"[.]")[[1]]
     ok<-length(scientific_name_spl)==2
     if(!ok){stop("\"scientific_name\" must be two words separated by a \".\", like \"Homo.sapiens\"")}
@@ -3503,6 +3511,18 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         
         install(paste(annotation_directory,pkgnm,sep="/"),upgrade = F)
         cat(paste("Installing the BSgenome package --- Done! ",date(),"\n",sep = ""))
+
+        
+        }else{
+            if(!is(genome_seq,'FaFile')){
+                genome_seq <- Rsamtools::FaFile(genome_seq)
+            }
+            if(!is(genome_seq,'FaFile_Circ')){
+                genome_seq <- FaFile_Circ(genome_seq,circularRanges=circ_chroms)
+            }
+            seqinfo(genome_seq)@is_circular[which(seqnames(seqinfo_genome)%in%circ_chroms)]<-TRUE
+            seqinfotwob<-seqinfo(genome_seq)
+        }
         
     }
     
@@ -3834,7 +3854,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         }
         
     }
-    
+    return(annot_file)
 }
 
 
