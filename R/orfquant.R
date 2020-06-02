@@ -3531,6 +3531,8 @@ prepare_annotation_files<-function(annotation_directory,twobit_file=NULL,gtf_fil
     
     #Create the TxDb from GTF and BSGenome info
     
+    annot_file <- paste(annotation_directory,"/",basename(gtf_file),"_Rannot",sep="") 
+       
     if(create_TxDb){
         cat(paste("Creating the TxDb object ... ",date(),"\n",sep = ""))
         
@@ -3820,7 +3822,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file=NULL,gtf_fil
         
         
         #Save as a RData object
-        save(GTF_annotation,file=paste(annotation_directory,"/",basename(gtf_file),"_Rannot",sep=""))
+        save(GTF_annotation,file=annot_file)
         cat(paste("Rannot object created!   ",date(),"\n",sep = ""))
         
         
@@ -3857,6 +3859,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file=NULL,gtf_fil
         }
         
     }
+
     return(annot_file)
 }
 
