@@ -6,13 +6,15 @@
 \usage{
 prepare_annotation_files(
   annotation_directory,
-  twobit_file,
+  twobit_file = NULL,
   gtf_file,
   scientific_name = "Homo.sapiens",
   annotation_name = "genc25",
-  export_bed_tables_TxDb = T,
-  forge_BSgenome = T,
-  create_TxDb = T
+  export_bed_tables_TxDb = TRUE,
+  forge_BSgenome = TRUE,
+  genome_seq = NULL,
+  circ_chroms = DEFAULT_CIRC_SEQS,
+  create_TxDb = TRUE
 )
 }
 \arguments{
@@ -29,6 +31,10 @@ prepare_annotation_files(
 \item{export_bed_tables_TxDb}{Export coordinates and info about different genomic regions in the annotation_directory? It defaults to \code{TRUE}}
 
 \item{forge_BSgenome}{Forge and install a \code{BSgenome} package? It defaults to \code{TRUE}}
+
+\item{genome_seq}{Fasta file to use for genome seq if not forging a BSgenome package}
+
+\item{circ_chroms}{Chromosomes to make circular in the genome sequence - defaults to DEFAULT_CIRC_SEQS}
 
 \item{create_TxDb}{Create a \code{TxDb} object and a *Rannot object? It defaults to \code{TRUE}}
 }
