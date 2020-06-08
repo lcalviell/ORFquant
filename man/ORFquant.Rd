@@ -4,21 +4,12 @@
 \alias{ORFquant}
 \title{Detection, quantification and annotation of translated ORFs in a genomic region}
 \usage{
-ORFquant(
-  region,
-  for_ORFquant,
-  genetic_code_region,
-  orf_find.all_starts = T,
-  orf_find.nostarts = F,
-  orf_find.start_sel_cutoff = NA,
-  orf_find.start_sel_cutoff_ave = 0.5,
-  orf_find.cutoff_fr_ave = 0.5,
-  orf_quant.cutoff_cums = NA,
-  orf_quant.cutoff_pct = 2,
-  orf_quant.cutoff_P_sites = NA,
-  unique_reads = F,
-  orf_quant.scaling = "total_Psites"
-)
+ORFquant(region, for_ORFquant, genetic_code_region,
+  orf_find.all_starts = T, orf_find.nostarts = F,
+  orf_find.start_sel_cutoff = NA, orf_find.start_sel_cutoff_ave = 0.5,
+  orf_find.cutoff_fr_ave = 0.5, orf_quant.cutoff_cums = NA,
+  orf_quant.cutoff_pct = 2, orf_quant.cutoff_P_sites = NA,
+  unique_reads = F, orf_quant.scaling = "total_Psites")
 }
 \arguments{
 \item{region}{GRanges object with genomic coordinates of the genomic region analyzed}

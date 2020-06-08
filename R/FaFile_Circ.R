@@ -1,5 +1,12 @@
 #' @import Rsamtools
 NULL
+
+
+DEFAULT_CIRC_SEQS <- unique(c("chrM","MT","MtDNA","mit","Mito","mitochondrion",
+                              "dmel_mitochondrion_genome","Pltd","ChrC","Pt","chloroplast",
+                              "Chloro","2micron","2-micron","2uM",
+                              "Mt", "NC_001879.2", "NC_006581.1","ChrM"))
+
    
 ################################################################################
 #' A simple extension to the FaFile class that
@@ -8,7 +15,6 @@ NULL
 #'
 #' @field circularRanges A character vector describing which seqnames have circular ranges
 #' @importFrom Rsamtools FaFile
-#' @importFrom GenomicFeatures DEFAULT_CIRC_SEQS
 #' @examples
 #' mytempfile=tempfile()
 #' writeXStringSet(setNames(DNAStringSet(c('AAAAAAAAGG','AAAAAAAAGG')),

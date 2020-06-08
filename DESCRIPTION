@@ -11,8 +11,6 @@ Description: ORFquant is a method that annotates and quantifies
     translation at the single ORF level using Ribo-seq data.
 License: GPL-3 or above
 Depends: 
-    purrr,
-    tidyverse,
     BiocGenerics,
     Biostrings,
     BSgenome,
@@ -30,7 +28,9 @@ Depends:
     multitaper,
     reshape2,
     rmarkdown,
-    rtracklayer,
+    rtracklayer
+Suggests:
+    dplyr,
     Gviz
 Authors: c(person("Lorenzo", "Calviello", email =
     "calviello.l.bio@gmail.com", role = c("aut","cre")), person("Uwe",

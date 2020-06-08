@@ -3169,9 +3169,8 @@ run_ORFquant<-function(for_ORFquant_file,annotation_file,n_cores,prefix=for_ORFq
     cat(paste("Summoning ORFquant with ", sum(for_ORFquant_data$P_sites_all%over%genes_red)," P_sites positions over ", length(genes_red), " genomic regions using ",n_cores," processor(s) ... ",date(),"\n",sep = ""))
     
     if(n_cores>1){
-        
-        ORFs_found<-foreach(g=1:length(genes_red),.packages='GenomicRanges') %dopar%{
-            
+        ORFs_found<-foreach(g=1:length(genes_red),.packages=c('GenomicRanges')) %dopar%{
+            cat('.')
             gen_region<-genes_red[g]
             genetcd<-GTF_annotation$genetic_codes$genetic_code[rownames(GTF_annotation$genetic_codes)==as.character(seqnames(gen_region))]
             genetcd<-getGeneticCode(genetcd)
@@ -3185,10 +3184,12 @@ run_ORFquant<-function(for_ORFquant_file,annotation_file,n_cores,prefix=for_ORFq
                    orf_find.start_sel_cutoff = stn.orf_find.start_sel_cutoff,orf_find.start_sel_cutoff_ave = stn.orf_find.start_sel_cutoff_ave,
                    orf_find.cutoff_fr_ave=stn.orf_find.cutoff_fr_ave,orf_quant.cutoff_cums = stn.orf_quant.cutoff_cums,
                    orf_quant.cutoff_pct = stn.orf_quant.cutoff_pct,orf_quant.cutoff_P_sites=stn.orf_quant.cutoff_P_sites,unique_reads = unique_reads_only,orf_quant.scaling = stn.orf_quant.scaling)
+        
         }
+
         
     }
-    
+    options(error = quote({dump.frames(); save.image(file = "last.dump.rda")}))
     if(n_cores==1){
         ORFs_found<-list()
         for(g in 1:length(genes_red)){
@@ -3655,12 +3656,13 @@ prepare_annotation_files<-function(annotation_directory,twobit_file=NULL,gtf_fil
         
         ov<-findOverlaps(unq_intr,all_intr,type="equal")
         ov<-split(subjectHits(ov),queryHits(ov))
+        
         a_nam<-CharacterList(lapply(ov,FUN = function(x){unique(names(all_intr)[x])}))
         
         unq_intr$type="J"
         unq_intr$tx_name<-a_nam
         
-        
+        browser() 
         mat_genes<-match(unq_intr$tx_name,trann$transcript_id)
         g<-unlist(apply(cbind(1:length(mat_genes),Y = elementNROWS(mat_genes)),FUN =function(x) rep(x[1],x[2]),MARGIN = 1))
         g2<-split(trann[unlist(mat_genes),"gene_id"],g)
@@ -5761,7 +5763,7 @@ create_ORFquant_html_report <- function(input_files, input_sample_names, output_
 #' Create a plot of the ORFquant results at a locus. Uses the info form the orfquant results about where the psite data is located.
 #' 
 #' @keywords ORFquant
-#' @author Lorenzo Calviello, \email{calviello.bio@@gmail.com}
+#' @author Dermot Harnett, \email{dermot.p.harnett@@gmail.com}
 #' 
 #' @param input_files Character vector with full paths to plot files (*ORFquant_plots_RData) 
 #' generated with \code{plot_ORFquant_results}. 
@@ -5776,8 +5778,14 @@ create_ORFquant_html_report <- function(input_files, input_sample_names, output_
 #' @param plotfile the file into which the plot will be saved as a pdf
 #' @return returns the value of plotfile if successfull.
 #' @export
+#' 
 plot_orfquant_locus<-function(locus,orfquant_results, bam_files=NULL,plotfile='locusplot.pdf', col ='green' ){
-    
+    if (!requireNamespace(c("Gviz",'dplyr','purrr'), quietly = TRUE)) {
+            stop("Packages \"Gviz\",\"dplyr\" needed for this function to work. Please install it.",
+      call. = FALSE)
+    }
+    `%>%` <- dplyr::`%>%`
+
     if(!is.null(orfquant_results$psite_data_file)){stop("this object looks like it's form an old version of ORFquant, it doesn't list the psite data file")}
     if(length(orfquant_results$psite_data_file)>1){stop("locus plots aren't supported for multiple psite tracks - either unify the psite tracks or modify the input object to have only one track")}
     riboseqcoutput<-get(load(orfquant_results$psite_data_file))
@@ -5811,8 +5819,9 @@ plot_orfquant_locus<-function(locus,orfquant_results, bam_files=NULL,plotfile='l
     if('ORF_pM' %in% metacols) quantcol = 'ORF_pM' else quantcol = 'TrP_pNpM'
     orfscores<- orfquantgr$feature%>%unique%>%setNames(match(.,orfs_quantified_gen$ORF_id_tr)%>%orfs_quantified_gen[[quantcol]][.],.)
     orfcols <- orfscores%>%{./max(na.omit(.))}%>%
-        c(0,.)%>%
-        map_chr(~possibly(rgb,'white')(0,.,0))%>%setNames(c('0',orfquantgr$feature%>%unique))
+        c(0,.)
+
+    orfcols <- vapply(function(.)tryCatch({rgb(0,.,0)},error=function(e){'white'}),'foo')%>%setNames(c('0',orfquantgr$feature%>%unique))
     ###Define non selected
     disctxs<-anno$txs_gene[selgene]%>%unlist%>%.$tx_name%>%unique%>%setdiff(seltxs)
     disc_orfquantgr <- anno$cds_txs_coords%>%
@@ -5833,7 +5842,7 @@ plot_orfquant_locus<-function(locus,orfquant_results, bam_files=NULL,plotfile='l
     disc_orfquantgr$symbol = discORFnames[disc_orfquantgr$transcript]
     fakejreads <- riboseqcoutput$junctions%>%subset(any(gene_id==selgene))%>%resize(width(.)+2,'center')%>%
         {.$cigar <- paste0('1M',width(.)-2,'N','1M');.}
-    fakejreads <- fakejreads[map2(seq_along(fakejreads[]),fakejreads$reads,rep)%>%unlist]
+    fakejreads <- fakejreads[mapply(seq_along(fakejreads[]),fakejreads$reads,FUN=rep)%>%unlist]
     ncols <- 2
     nrows <- 1
     orfcols <- orfcols[order(-orfscores[names(orfcols)])]
@@ -5874,25 +5883,25 @@ plot_orfquant_locus<-function(locus,orfquant_results, bam_files=NULL,plotfile='l
     just = c("left", "bottom"))
     pushViewport(vp1)
     #finally plot the locus
-    plotTracks(main=plottitle,cex.main=2,legend=TRUE,add=TRUE,
+    Gviz::plotTracks(main=plottitle,cex.main=2,legend=TRUE,add=TRUE,
     from=plotstart,to=plotend,#zoomed in on the orf in question
     sizes=c(1,1,1,1,1,1,1),rot.title=0,cex.title=1,title.width=2.5,
     c(
-        GenomeAxisTrack(range=selgenerange),
-        # rnaseqtrack, # plot the riboseq signal
-        # txs_discarded_Track,
-        # txs_selected_track,
-        # DataTrack(riboseqcoutput$P_sites_all%>%subsetByOverlaps(selgenerange),type='hist'),
-        GeneRegionTrack(name='discarded\ntranscripts',anno$exons_tx[disctxs]%>%unlist%>%{.$transcript=names(.);.$feature=rep('exon',length(.));.},fill='#F7CAC9',
+        Gviz::GenomeAxisTrack(range=selgenerange),
+        # Gviz::rnaseqtrack, # plot the riboseq signal
+        # Gviz::txs_discarded_Track,
+        # Gviz::txs_selected_track,
+        # Gviz::DataTrack(riboseqcoutput$P_sites_all%>%subsetByOverlaps(selgenerange),type='hist'),
+        Gviz::GeneRegionTrack(name='discarded\ntranscripts',anno$exons_tx[disctxs]%>%unlist%>%{.$transcript=names(.);.$feature=rep('exon',length(.));.},fill='#F7CAC9',
                 transcriptAnnotation='transcript'),
-        GeneRegionTrack(exon='forestgreen',name='selected\ntranscripts',anno$exons_tx[seltxs]%>%unlist%>%{.$transcript=names(.);.$feature=rep('exon',length(.));.},fill='#F7CAC9',
+        Gviz::GeneRegionTrack(exon='forestgreen',name='selected\ntranscripts',anno$exons_tx[seltxs]%>%unlist%>%{.$transcript=names(.);.$feature=rep('exon',length(.));.},fill='#F7CAC9',
                 transcriptAnnotation='transcript'),
-        DataTrack(legend=TRUE,name='\t\t P-Sites',col.histogram='forestgreen',riboseqcoutput$P_sites_all%>%subsetByOverlaps(selgenerange),type='hist'),
-        AlignmentsTrack(name='\nJunction Reads\n\n\n',col.sashimi='forestgreen',fakejreads[,'cigar'],type='sashimi',sashimiNumbers=TRUE),
-        # GeneRegionTrack(discarded_orfs_gen),
-        GeneRegionTrack(name='Discarded\nORFs',disc_orfquantgrfix,
+        Gviz::DataTrack(legend=TRUE,name='\t\t P-Sites',col.histogram='forestgreen',riboseqcoutput$P_sites_all%>%subsetByOverlaps(selgenerange),type='hist'),
+        Gviz::AlignmentsTrack(name='\nJunction Reads\n\n\n',col.sashimi='forestgreen',fakejreads[,'cigar'],type='sashimi',sashimiNumbers=TRUE),
+        # Gviz::GeneRegionTrack(discarded_orfs_gen),
+        Gviz::GeneRegionTrack(name='Discarded\nORFs',disc_orfquantgrfix,
             transcriptAnnotation='symbol',collapse=FALSE,thinBoxFeature='utr',CDS='blue',utr='white'),
-        GeneRegionTrack(name='Selected\nORFs',
+        Gviz::GeneRegionTrack(name='Selected\nORFs',
                 range=orfquantgr_sorted,collapse=FALSE,
             thinBoxFeature='utr',CDS='red',utr='white',
             transcriptAnnotation='symbol'

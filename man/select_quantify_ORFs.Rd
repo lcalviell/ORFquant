@@ -4,17 +4,9 @@
 \alias{select_quantify_ORFs}
 \title{Select and quantify ORF translation}
 \usage{
-select_quantify_ORFs(
-  results_ORFs,
-  P_sites,
-  P_sites_uniq,
-  cutoff_cums = NA,
-  cutoff_pct = 2,
-  cutoff_P_sites = NA,
-  optimiz = FALSE,
-  scaling = "total_Psites",
-  uniq_signal = F
-)
+select_quantify_ORFs(results_ORFs, P_sites, P_sites_uniq,
+  cutoff_cums = NA, cutoff_pct = 2, cutoff_P_sites = NA,
+  optimiz = FALSE, scaling = "total_Psites", uniq_signal = F)
 }
 \arguments{
 \item{results_ORFs}{Full list of detected ORFs, from \code{detect_translated_ORFs}}

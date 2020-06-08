@@ -4,19 +4,13 @@
 \alias{prepare_for_ORFquant}
 \title{Prepare the "for_ORFquant" file}
 \usage{
-prepare_for_ORFquant(
-  annotation_file,
-  bam_file,
-  path_to_rl_cutoff_file = NA,
-  chunk_size = 5e+06,
-  path_to_P_sites_plus_bw = NA,
-  path_to_P_sites_minus_bw = NA,
+prepare_for_ORFquant(annotation_file, bam_file,
+  path_to_rl_cutoff_file = NA, chunk_size = 5e+06,
+  path_to_P_sites_plus_bw = NA, path_to_P_sites_minus_bw = NA,
   path_to_P_sites_uniq_plus_bw = NA,
   path_to_P_sites_uniq_minus_bw = NA,
   path_to_P_sites_uniq_mm_plus_bw = NA,
-  path_to_P_sites_uniq_mm_minus_bw = NA,
-  dest_name = NA
-)
+  path_to_P_sites_uniq_mm_minus_bw = NA, dest_name = NA)
 }
 \arguments{
 \item{annotation_file}{Full path to the annotation file (*Rannot)}

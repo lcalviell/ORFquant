@@ -4,17 +4,9 @@
 \alias{detect_readthrough}
 \title{Analyzed translation on possible readthrough regions (beta)}
 \usage{
-detect_readthrough(
-  results_orf,
-  P_sites,
-  P_sites_uniq,
-  P_sites_uniq_mm,
-  genome_sequence,
-  annotation,
-  genetic_code_table,
-  cutoff_fr_ave = 0.5,
-  uniq_signal = F
-)
+detect_readthrough(results_orf, P_sites, P_sites_uniq, P_sites_uniq_mm,
+  genome_sequence, annotation, genetic_code_table, cutoff_fr_ave = 0.5,
+  uniq_signal = F)
 }
 \arguments{
 \item{results_orf}{Full list of detected ORFs, from \code{select_quantify_ORFs} and \code{annotate_ORFs}}

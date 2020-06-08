@@ -4,13 +4,8 @@
 \alias{plot_orfquant_locus}
 \title{Create a plot of the ORFquant results at a locus}
 \usage{
-plot_orfquant_locus(
-  locus,
-  orfquant_results,
-  bam_files = NULL,
-  plotfile = "locusplot.pdf",
-  col = "green"
-)
+plot_orfquant_locus(locus, orfquant_results, bam_files = NULL,
+  plotfile = "locusplot.pdf", col = "green")
 }
 \arguments{
 \item{locus}{String; a gene name, must be present in names(orfquant_results$ORFs_gen)}
@@ -35,6 +30,6 @@ returns the value of plotfile if successfull.
 Create a plot of the ORFquant results at a locus. Uses the info form the orfquant results about where the psite data is located.
 }
 \author{
-Lorenzo Calviello, \email{calviello.bio@gmail.com}
+Dermot Harnett, \email{dermot.p.harnett@gmail.com}
 }
 \keyword{ORFquant}
