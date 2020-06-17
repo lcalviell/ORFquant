@@ -4,8 +4,7 @@
 \alias{annotate_ORFs}
 \title{Annotate detected ORFs in transcript and genome space}
 \usage{
-annotate_ORFs(results_ORFs, Annotation, genome_sequence, region,
-  genetic_code)
+annotate_ORFs(results_ORFs, Annotation, genome_sequence, region, genetic_code)
 }
 \arguments{
 \item{results_ORFs}{Full list of detected ORFs, from \code{select_quantify_ORFs}}

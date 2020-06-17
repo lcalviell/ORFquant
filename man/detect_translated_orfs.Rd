@@ -4,10 +4,22 @@
 \alias{detect_translated_orfs}
 \title{Detect actively translated ORFs}
 \usage{
-detect_translated_orfs(selected_txs, genome_sequence, annotation, P_sites,
-  P_sites_uniq, P_sites_uniq_mm, genomic_region, genetic_code,
-  all_starts = T, nostarts = F, start_sel_cutoff = NA,
-  start_sel_cutoff_ave = 0.5, cutoff_fr_ave = 0.5, uniq_signal = F)
+detect_translated_orfs(
+  selected_txs,
+  genome_sequence,
+  annotation,
+  P_sites,
+  P_sites_uniq,
+  P_sites_uniq_mm,
+  genomic_region,
+  genetic_code,
+  all_starts = T,
+  nostarts = F,
+  start_sel_cutoff = NA,
+  start_sel_cutoff_ave = 0.5,
+  cutoff_fr_ave = 0.5,
+  uniq_signal = F
+)
 }
 \arguments{
 \item{selected_txs}{set of selected transcripts, output from \code{select_txs}}

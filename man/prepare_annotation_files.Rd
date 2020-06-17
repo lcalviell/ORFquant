@@ -4,11 +4,18 @@
 \alias{prepare_annotation_files}
 \title{Prepare comprehensive sets of annotated genomic features}
 \usage{
-prepare_annotation_files(annotation_directory, twobit_file = NULL,
-  gtf_file, scientific_name = "Homo.sapiens",
-  annotation_name = "genc25", export_bed_tables_TxDb = TRUE,
-  forge_BSgenome = TRUE, genome_seq = NULL,
-  circ_chroms = DEFAULT_CIRC_SEQS, create_TxDb = TRUE)
+prepare_annotation_files(
+  annotation_directory,
+  twobit_file = NULL,
+  gtf_file,
+  scientific_name = "Homo.sapiens",
+  annotation_name = "genc25",
+  export_bed_tables_TxDb = TRUE,
+  forge_BSgenome = TRUE,
+  genome_seq = NULL,
+  circ_chroms = DEFAULT_CIRC_SEQS,
+  create_TxDb = TRUE
+)
 }
 \arguments{
 \item{annotation_directory}{The target directory which will contain the output files}

@@ -4,8 +4,13 @@
 \alias{plot_orfquant_locus}
 \title{Create a plot of the ORFquant results at a locus}
 \usage{
-plot_orfquant_locus(locus, orfquant_results, bam_files = NULL,
-  plotfile = "locusplot.pdf", col = "green")
+plot_orfquant_locus(
+  locus,
+  orfquant_results,
+  bam_files,
+  plotfile = "locusplot.pdf",
+  col = "green"
+)
 }
 \arguments{
 \item{locus}{String; a gene name, must be present in names(orfquant_results$ORFs_gen)}

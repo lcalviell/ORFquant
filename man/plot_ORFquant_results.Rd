@@ -4,9 +4,15 @@
 \alias{plot_ORFquant_results}
 \title{Plot general statistics about ORFquant results}
 \usage{
-plot_ORFquant_results(for_ORFquant_file, ORFquant_output_file,
-  annotation_file, coverage_file_plus = NA, coverage_file_minus = NA,
-  output_plots_path = NA, prefix = NA)
+plot_ORFquant_results(
+  for_ORFquant_file,
+  ORFquant_output_file,
+  annotation_file,
+  coverage_file_plus = NA,
+  coverage_file_minus = NA,
+  output_plots_path = NA,
+  prefix = NA
+)
 }
 \arguments{
 \item{for_ORFquant_file}{path to the "for_ORFquant" file containing P_sites positions and junction reads}
