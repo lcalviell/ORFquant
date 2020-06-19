@@ -3170,7 +3170,6 @@ run_ORFquant<-function(for_ORFquant_file,annotation_file,n_cores,prefix=for_ORFq
     
     if(n_cores>1){
         ORFs_found<-foreach(g=(1:length(genes_red)),.packages=c('GenomicRanges')) %dopar%{
-            cat('.')
             gen_region<-genes_red[g]
             genetcd<-GTF_annotation$genetic_codes$genetic_code[rownames(GTF_annotation$genetic_codes)==as.character(seqnames(gen_region))]
             genetcd<-getGeneticCode(genetcd)
@@ -3340,7 +3339,7 @@ run_ORFquant<-function(for_ORFquant_file,annotation_file,n_cores,prefix=for_ORFq
     }
     cat(paste("Exporting ORFquant results --- Done! ",date(),"\n",sep = ""))
     ORFquant_results$psite_data_file <- for_ORFquant_file
-    ORFquant_results   
+    invisible(ORFquant_results)
 }
 
 
@@ -4659,7 +4658,7 @@ prepare_for_ORFquant<-function(annotation_file,bam_file,path_to_rl_cutoff_file=N
     cat(paste("Calculating P-sites positions and junctions --- Done!", date(),"\n"))
     
     save(for_ORFquant,file = paste(dest_name,"for_ORFquant",sep = "_"))
-    paste(dest_name,"for_ORFquant",sep = "_")
+    invisible(paste(dest_name,"for_ORFquant",sep = "_"))
 }
 
 
