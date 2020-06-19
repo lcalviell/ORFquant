@@ -3169,9 +3169,7 @@ run_ORFquant<-function(for_ORFquant_file,annotation_file,n_cores,prefix=for_ORFq
     cat(paste("Summoning ORFquant with ", sum(for_ORFquant_data$P_sites_all%over%genes_red)," P_sites positions over ", length(genes_red), " genomic regions using ",n_cores," processor(s) ... ",date(),"\n",sep = ""))
     
     if(n_cores>1){
-        
-        ORFs_found<-foreach(g=1:length(genes_red),.packages='GenomicRanges') %dopar%{
-            
+        ORFs_found<-foreach(g=(1:length(genes_red)),.packages=c('GenomicRanges')) %dopar%{
             gen_region<-genes_red[g]
             genetcd<-GTF_annotation$genetic_codes$genetic_code[rownames(GTF_annotation$genetic_codes)==as.character(seqnames(gen_region))]
             genetcd<-getGeneticCode(genetcd)
@@ -3185,10 +3183,11 @@ run_ORFquant<-function(for_ORFquant_file,annotation_file,n_cores,prefix=for_ORFq
                    orf_find.start_sel_cutoff = stn.orf_find.start_sel_cutoff,orf_find.start_sel_cutoff_ave = stn.orf_find.start_sel_cutoff_ave,
                    orf_find.cutoff_fr_ave=stn.orf_find.cutoff_fr_ave,orf_quant.cutoff_cums = stn.orf_quant.cutoff_cums,
                    orf_quant.cutoff_pct = stn.orf_quant.cutoff_pct,orf_quant.cutoff_P_sites=stn.orf_quant.cutoff_P_sites,unique_reads = unique_reads_only,orf_quant.scaling = stn.orf_quant.scaling)
+        
         }
+
         
     }
-    
     if(n_cores==1){
         ORFs_found<-list()
         for(g in 1:length(genes_red)){
@@ -3339,7 +3338,8 @@ run_ORFquant<-function(for_ORFquant_file,annotation_file,n_cores,prefix=for_ORFq
         ORFquant_results<<-ORFquant_results
     }
     cat(paste("Exporting ORFquant results --- Done! ",date(),"\n",sep = ""))
-    
+    ORFquant_results$psite_data_file <- for_ORFquant_file
+    invisible(ORFquant_results)
 }
 
 
@@ -3355,8 +3355,12 @@ run_ORFquant<-function(for_ORFquant_file,annotation_file,n_cores,prefix=for_ORFq
 
 load_annotation<-function(path){
     GTF_annotation<-get(load(path))
-    library(GTF_annotation$genome_package,character.only = T)
-    genome_sequence<-get(GTF_annotation$genome_package)
+    if(is(GTF_annotation$genome,'FaFile')){
+        genome_sequence <- GTF_annotation$genome            
+    }else{
+        library(GTF_annotation$genome_package,character.only = T)
+        genome_sequence<-get(GTF_annotation$genome_package)
+    }
     GTF_annotation<<-GTF_annotation
     genome_seq<<-genome_sequence
 }
@@ -3377,6 +3381,8 @@ load_annotation<-function(path){
 #' @param annotation_name A name to give to annotation used; defaults to genc25
 #' @param export_bed_tables_TxDb Export coordinates and info about different genomic regions in the annotation_directory? It defaults to \code{TRUE}
 #' @param forge_BSgenome Forge and install a \code{BSgenome} package? It defaults to \code{TRUE}
+#' @param genome_seq Fasta file to use for genome seq if not forging a BSgenome package
+#' @param circ_chroms Chromosomes to make circular in the genome sequence - defaults to DEFAULT_CIRC_SEQS
 #' @param create_TxDb Create a \code{TxDb} object and a *Rannot object? It defaults to \code{TRUE}
 #' @details This function uses the \code{makeTxDbFromGFF} function to  create a TxDb object and extract
 #' genomic regions and other info to a *Rannot R file; the \code{mapToTranscripts} and \code{mapFromTranscripts} functions are used to 
@@ -3414,30 +3420,37 @@ load_annotation<-function(path){
 #' @seealso \code{\link{load_annotation}}, \code{\link{forgeBSgenomeDataPkg}}, \code{\link{makeTxDbFromGFF}}, \code{\link{run_ORFquant}}.
 #' @export
 
-prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,scientific_name="Homo.sapiens",annotation_name="genc25",export_bed_tables_TxDb=T,forge_BSgenome=T,create_TxDb=T){
-    
-    
+prepare_annotation_files<-function(annotation_directory,twobit_file=NULL,gtf_file,scientific_name="Homo.sapiens",annotation_name="genc25",export_bed_tables_TxDb=TRUE,forge_BSgenome=TRUE,genome_seq=NULL,circ_chroms=DEFAULT_CIRC_SEQS,create_TxDb=TRUE){
+    if(!is.null(genome_seq)){
+        forge_BSgenome=FALSE
+        message('fasta file passed - cancelling BSgenome creation')
+    }
+  
     DEFAULT_CIRC_SEQS <- unique(c("chrM","MT","MtDNA","mit","Mito","mitochondrion",
                                   "dmel_mitochondrion_genome","Pltd","ChrC","Pt","chloroplast",
                                   "Chloro","2micron","2-micron","2uM",
                                   "Mt", "NC_001879.2", "NC_006581.1","ChrM","mitochondrion_genome"))
+
     #adjust variable names (some chars not permitted)
     annotation_name<-gsub(annotation_name,pattern = "_",replacement = "")
     annotation_name<-gsub(annotation_name,pattern = "-",replacement = "")
-    if(!dir.exists(annotation_directory)){dir.create(path = annotation_directory,recursive = T)}
+    if(!dir.exists(annotation_directory)){dir.create(path = annotation_directory,recursive = TRUE)}
     annotation_directory<-normalizePath(annotation_directory)
-    twobit_file<-normalizePath(twobit_file)
     gtf_file<-normalizePath(gtf_file)
-    
-    for (f in c(twobit_file,gtf_file)){
+
+    filestotest <- c(gtf_file)
+    if(forge_BSgenome) filestotest <- c(filestotest,twobit_file)
+    for (f in filestotest){
         if(file.access(f, 0)==-1) {
             stop("
                  The following files don't exist:\n",
                  f, "\n")
         }
-    }
+     }
     
     
+    if(forge_BSgenome){
+
     scientific_name_spl<-strsplit(scientific_name,"[.]")[[1]]
     ok<-length(scientific_name_spl)==2
     if(!ok){stop("\"scientific_name\" must be two words separated by a \".\", like \"Homo.sapiens\"")}
@@ -3454,7 +3467,6 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
     
     #Forge a BSGenome package
     
-    if(forge_BSgenome){
         cat(paste("Creating the BSgenome package ... ",date(),"\n",sep = ""))
         seed_text<-paste("Package: BSgenome.",scientific_name,".",annotation_name,"\n",
                          "Title: Full genome sequences for ",scientific_name,", ",annotation_name,"\n",
@@ -3502,11 +3514,27 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         
         install(paste(annotation_directory,pkgnm,sep="/"),upgrade = F)
         cat(paste("Installing the BSgenome package --- Done! ",date(),"\n",sep = ""))
+
         
+    }else{
+            if(!is(genome_seq,'FaFile')){
+                genome_seq <- Rsamtools::FaFile(genome_seq)
+            }
+            if(!is(genome_seq,'FaFile_Circ')){
+                genome_seq <- FaFile_Circ(genome_seq,circularRanges=circ_chroms)
+            }
+            seqinfotwob<-seqinfo(genome_seq)
+            genome <- genome_seq
+            pkgnm=NULL
     }
+        
+   
+
     
     #Create the TxDb from GTF and BSGenome info
     
+    annot_file <- paste(annotation_directory,"/",basename(gtf_file),"_Rannot",sep="") 
+       
     if(create_TxDb){
         cat(paste("Creating the TxDb object ... ",date(),"\n",sep = ""))
         
@@ -3627,11 +3655,11 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         
         ov<-findOverlaps(unq_intr,all_intr,type="equal")
         ov<-split(subjectHits(ov),queryHits(ov))
+        
         a_nam<-CharacterList(lapply(ov,FUN = function(x){unique(names(all_intr)[x])}))
         
         unq_intr$type="J"
         unq_intr$tx_name<-a_nam
-        
         
         mat_genes<-match(unq_intr$tx_name,trann$transcript_id)
         g<-unlist(apply(cbind(1:length(mat_genes),Y = elementNROWS(mat_genes)),FUN =function(x) rep(x[1],x[2]),MARGIN = 1))
@@ -3667,8 +3695,10 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         
         #define start and stop codons (genome space)
         
-        suppressPackageStartupMessages(library(pkgnm,character.only=TRUE))
-        genome<-get(pkgnm)
+        if(forge_BSgenome){
+            suppressPackageStartupMessages(library(pkgnm,character.only=TRUE))
+            genome<-get(pkgnm)
+        }
         tocheck<-as.character(runValue(seqnames(cds_tx)))
         tocheck<-cds_tx[!tocheck%in%circs]
         seqcds<-extractTranscriptSeqs(genome,transcripts = tocheck)
@@ -3781,8 +3811,8 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         
         
         #put in a list
-        GTF_annotation<-list(transcripts_db,txs_gene,ifs,unq_stst,cds_tx,intron_names_tx,cds_gen,exons_tx,nsns,unq_intr,genes,threeutrs,fiveutrs,ncisof,ncrnas,introns,intergenicRegions,trann,cds_txscoords,translations,pkgnm,stop_inannot)
-        names(GTF_annotation)<-c("txs","txs_gene","seqinfo","start_stop_codons","cds_txs","introns_txs","cds_genes","exons_txs","exons_bins","junctions","genes","threeutrs","fiveutrs","ncIsof","ncRNAs","introns","intergenicRegions","trann","cds_txs_coords","genetic_codes","genome_package","stop_in_gtf")
+        GTF_annotation<-list(transcripts_db,txs_gene,ifs,unq_stst,cds_tx,intron_names_tx,cds_gen,exons_tx,nsns,unq_intr,genes,threeutrs,fiveutrs,ncisof,ncrnas,introns,intergenicRegions,trann,cds_txscoords,translations,pkgnm,stop_inannot,genome)
+        names(GTF_annotation)<-c("txs","txs_gene","seqinfo","start_stop_codons","cds_txs","introns_txs","cds_genes","exons_txs","exons_bins","junctions","genes","threeutrs","fiveutrs","ncIsof","ncRNAs","introns","intergenicRegions","trann","cds_txs_coords","genetic_codes","genome_package","stop_in_gtf","genome")
         
         txs_all<-unique(GTF_annotation$trann$transcript_id)
         txs_exss<-unique(names(GTF_annotation$exons_txs))
@@ -3796,7 +3826,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         
         
         #Save as a RData object
-        save(GTF_annotation,file=paste(annotation_directory,"/",basename(gtf_file),"_Rannot",sep=""))
+        save(GTF_annotation,file=annot_file)
         cat(paste("Rannot object created!   ",date(),"\n",sep = ""))
         
         
@@ -3833,7 +3863,8 @@ prepare_annotation_files<-function(annotation_directory,twobit_file,gtf_file,sci
         }
         
     }
-    
+
+    return(annot_file)
 }
 
 
@@ -4627,7 +4658,7 @@ prepare_for_ORFquant<-function(annotation_file,bam_file,path_to_rl_cutoff_file=N
     cat(paste("Calculating P-sites positions and junctions --- Done!", date(),"\n"))
     
     save(for_ORFquant,file = paste(dest_name,"for_ORFquant",sep = "_"))
-    
+    invisible(paste(dest_name,"for_ORFquant",sep = "_"))
 }
 
 
@@ -5725,3 +5756,195 @@ create_ORFquant_html_report <- function(input_files, input_sample_names, output_
                             output_file = output_file))
     sink()
 }
+
+
+#' Create a plot of the ORFquant results at a locus
+#'
+#' Create a plot of the ORFquant results at a locus. Uses the info form the orfquant results about where the psite data is located.
+#' 
+#' @keywords ORFquant
+#' @author Dermot Harnett, \email{dermot.p.harnett@@gmail.com}
+#' 
+#' @param input_files Character vector with full paths to plot files (*ORFquant_plots_RData) 
+#' generated with \code{plot_ORFquant_results}. 
+#' Must be of same length as \code{input_sample_names}.
+#' 
+#' @param input_sample_names Character vector containing input names.
+#' Must be of same length as \code{input_files}.
+#' 
+#' @param locus String; a gene name, must be present in names(orfquant_results$ORFs_gen)
+#' @param orfquant_results A list containing processed output from ORFquant
+#' @param bam_files bam files, (or pre-processed bam data from RiboseQC) to be plotted
+#' @param plotfile the file into which the plot will be saved as a pdf
+#' @return returns the value of plotfile if successfull.
+#' @export
+#' 
+plot_orfquant_locus<-function(locus,orfquant_results,bam_files, plotfile='locusplot.pdf', col ='green' ){
+    if (!requireNamespace(c("Gviz",'lemon','dplyr'), quietly = TRUE)) {
+            stop("Packages \"Gviz\",\"dplyr\",\"lemon\" needed for this function to work. Please install it.",
+      call. = FALSE)
+    }
+    options(ucscChromosomeNames=FALSE)
+    `%>%` <- dplyr::`%>%`
+
+    if(is.null(orfquant_results$psite_data_file)){stop("this object looks like it's form an old version of ORFquant, it doesn't list the psite data file")}
+    if(length(orfquant_results$psite_data_file)>1){stop("locus plots aren't supported for multiple psite tracks - either unify the psite tracks or modify the input object to have only one track")}
+    riboseqcoutput<-get(load(orfquant_results$psite_data_file))
+
+    anno <- GTF_annotation
+
+  
+    selgene <- locus
+    seltxs <- orfquant_results$ORFs_tx[orfquant_results$ORFs_tx$gene_id==selgene]$transcript_id
+    selorfs <- orfquant_results$ORFs_tx[orfquant_results$ORFs_tx$gene_id==selgene]$ORF_id_tr
+    stopifnot(length(locus)==1)
+    stopifnot(any(orfquant_results$ORFs_tx$gene_id==selgene))
+    orfs_quantified_gen <-  orfquant_results$ORFs_gen[selorfs]
+
+    mcols(orfs_quantified_gen) <- mcols(orfquant_results$ORFs_tx)[match(names(orfs_quantified_gen),orfquant_results$ORFs_tx$ORF_id_tr),]
+    seltxs <- orfs_quantified_gen$transcript_id%>%unique
+    orfs_quantified_gen$feature <- 'CDS'
+    orfs_quantified_gen$transcript=orfs_quantified_gen$transcript_id
+    anno <- GTF_annotation
+    orfs_quantified_tr <- anno$exons_tx
+    orfs_quantified_tr <- orfs_quantified_tr[unique(orfs_quantified_gen$transcript_id)]
+    #get the orfs, then get the negative coverage
+    #add transcript info to the ORFs_tx object
+    seqinf <- Seqinfo(names(anno$exons_tx),anno$exons_tx%>%width%>%sum)
+    #Now get the negatives for each ORF
+
+    utrs <- orfquant_results$ORFs_tx%>%subset(gene_id==selgene)%>%keepSeqlevels(seltxs)%>%{seqinfo(.)<-seqinf[seltxs];.}%>%
+        coverage%>%
+        as('GRanges')%>%subset(score==0)%>%mapFromTranscripts(anno$exons_tx)%>%
+        {.$transcript <- names(anno$exons_tx)[.$transcriptsHits];.}%>%
+        {.$feature='utr';.}
+
+    orfquantgr <- c(
+        orfs_quantified_gen[,c('feature','transcript')]
+        ,utrs[,c('feature','transcript')]
+    )
+    orfquantgr$feature[orfquantgr$feature=='CDS'] <- names(orfquantgr)[orfquantgr$feature=='CDS']
+    #get correct col name
+    metacols = colnames(mcols(orfs_quantified_gen))
+    quantcol = 'ORFs_pM'
+
+    ufeats <- orfquantgr$feature%>%{.=.[.!='utr'];.}%>%unique
+    orfscores<- ufeats%>%setNames(match(ufeats,orfs_quantified_gen$ORF_id_tr)%>%{mcols(orfs_quantified_gen[.])[[quantcol]]},.)
+
+
+    orfcols <- orfscores%>%{./max(na.omit(.))}%>%
+        c(0,.)
+
+    orfquantgrscores = mcols(orfs_quantified_gen)[[quantcol]][match(names(orfquantgr),orfs_quantified_gen$ORF_id_tr)]
+
+    orfcols <- orfquantgrscores%>% vapply(function(.)tryCatch({rgb(0,.,0)},error=function(e){'white'}),'foo')%>%setNames(c('0',orfquantgr$feature%>%unique))
+  
+
+    ###Define non selected
+    disctxs<-anno$txs_gene[selgene]%>%unlist%>%.$tx_name%>%unique%>%setdiff(seltxs)
+    disctxsint <- disctxs%>%intersect(seqnames(anno$cds_txs_coords))%>%as.character 
+    disc_orfquantgr <- anno$cds_txs_coords%>%
+        keepSeqlevels(disctxsint,'coarse')%>%
+        {seqinfo(.)<-seqinf[disctxsint];.}%>%  coverage%>%
+        as('GRanges')%>%
+        subset(.$score==0)%>%
+        {   
+            txgr = .
+            out = mapFromTranscripts(txgr,anno$exons_tx)
+            out$score = txgr$score[out$xHits]
+            out
+        }%>%
+        {.$transcript <- names(anno$exons_tx)[.$transcriptsHits];.}%>%
+        {.$feature=ifelse(.$score==0,'utr','CDS');.}
+    disc_orfquantgr <- disc_orfquantgr%>% c(.,anno$cds_txs[disctxsint]%>%unlist%>%{.$feature=rep('CDS',length(.));.$transcript=names(.);.})
+    discORFnames<-paste0(disctxs,'_',start(anno$cds_txs_coords[disctxsint]),'_',end(anno$cds_txs_coords[disctxsint]))%>%setNames(disctxsint)
+    disc_orfquantgr$symbol = discORFnames[disc_orfquantgr$transcript]
+    fakejreads <- riboseqcoutput$junctions%>%subset(any(gene_id==selgene))%>%resize(width(.)+2,'center')%>%
+        {.$cigar <- paste0('1M',width(.)-2,'N','1M');.}
+    fakejreads <- fakejreads[mapply(seq_along(fakejreads[]),fakejreads$reads,FUN=rep)%>%unlist]
+    ncols <- 2
+    nrows <- 1
+    orfcols <- orfcols[order(-orfscores[names(orfcols)])]
+    orfquantgr_sorted <- orfquantgr[order(orfscores[names(orfquantgr)])]
+    fix_utrs <- function(orfquantgr_sorted){
+        orfquantgr_sorted$symbol = names(orfquantgr_sorted)
+        #add utrs for each ORF
+        #for each selected ORF
+        orftrpairs<-orfquantgr_sorted%>%subset(feature!='utr')%>%mcols%>%as.data.frame%>%{dplyr::distinct(.)}
+        orfutrs <- orfquantgr_sorted%>%subset(feature=='utr')
+        orfutrs<-lapply(1:nrow(orftrpairs),function(i){
+            orfutrs <- orfutrs%>%subset(transcript==orftrpairs$transcript[i])
+            orfutrs$symbol = orftrpairs$feature[i]
+            names(orfutrs) = orfutrs$symbol 
+            orfutrs
+        })%>%GRangesList%>%unlist
+        orfquantgr_sorted<-orfquantgr_sorted%>%subset(feature!='utr')%>%c(.,orfutrs)
+        orfquantgr_sorted
+    }
+    orfquantgr_sorted<-fix_utrs(orfquantgr_sorted)
+    # disc_orfquantgrfix<-fix_utrs(disc_orfquantgr)
+    disc_orfquantgrfix<-(disc_orfquantgr)
+    #dimenions, extent of the plot
+    selgenerange <-  anno$genes[selgene]
+    plotstart = start(selgenerange) - (0.2 * (end(selgenerange)-start(selgenerange)))
+    plotend = end(selgenerange) + (0 * (end(selgenerange)-start(selgenerange)))
+    library(Gviz)
+    legendwidth=1/10
+    plottitle <- paste0('ORFquant: ',selgene)
+    #write to pdf
+    pdf(plotfile,width=14+2,h=7)
+    #code for arranging legend next to the locus plot
+    grid.newpage()
+    vp1 <- viewport(x = 0, y = 0, w = 1-legendwidth*1.5, h = 1,
+    just = c("left", "bottom"), name = "vp1")
+    vp2 <- viewport(x = 1-legendwidth*1.5, y = 0, w = legendwidth*1.5, h = 1,
+    just = c("left", "bottom"))
+    vp3 <- viewport(x = 1-legendwidth*1.5, y = 0, w = legendwidth*1.5, h = 1/7,
+    just = c("left", "bottom"))
+    pushViewport(vp1)
+    #finally plot the locus
+    Gviz::plotTracks(main=plottitle,cex.main=2,legend=TRUE,add=TRUE,
+    from=plotstart,to=plotend,#zoomed in on the orf in question
+    sizes=c(1,1,1,1,1,1,1),rot.title=0,cex.title=1,title.width=2.5,
+    c(
+        Gviz::GenomeAxisTrack(range=selgenerange),
+        # Gviz::rnaseqtrack, # plot the riboseq signal
+        # Gviz::txs_discarded_Track,
+        # Gviz::txs_selected_track,
+        # Gviz::DataTrack(riboseqcoutput$P_sites_all%>%subsetByOverlaps(selgenerange),type='hist'),
+        Gviz::GeneRegionTrack(name='discarded\ntranscripts',anno$exons_tx[disctxs]%>%unlist%>%{.$transcript=names(.);.$feature=rep('exon',length(.));.},fill='#F7CAC9',
+                transcriptAnnotation='transcript'),
+        Gviz::GeneRegionTrack(exon='forestgreen',name='selected\ntranscripts',anno$exons_tx[seltxs]%>%unlist%>%{.$transcript=names(.);.$feature=rep('exon',length(.));.},fill='#F7CAC9',
+                transcriptAnnotation='transcript'),
+        Gviz::DataTrack(legend=TRUE,name='\t\t P-Sites',col.histogram='forestgreen',riboseqcoutput$P_sites_all%>%subsetByOverlaps(selgenerange),type='hist'),
+        Gviz::AlignmentsTrack(name='\nJunction Reads\n\n\n',col.sashimi='forestgreen',fakejreads[,'cigar'],type='sashimi',sashimiNumbers=TRUE),
+        # Gviz::GeneRegionTrack(discarded_orfs_gen),
+        Gviz::GeneRegionTrack(name='Discarded\nORFs',disc_orfquantgrfix,
+            transcriptAnnotation='symbol',collapse=FALSE,thinBoxFeature='utr',CDS='blue',utr='white'),
+        Gviz::GeneRegionTrack(name='Selected\nORFs',
+                range=orfquantgr_sorted,collapse=FALSE,
+            thinBoxFeature='utr',CDS='red',utr='white',
+            transcriptAnnotation='symbol'
+        )%>%
+        # identity
+        {displayPars(.)[names(orfcols)]<-orfcols;.}
+    ),
+    col.labels='black',
+    chr=seqnames(selgenerange)
+    )
+    #create barchart of intensities
+    popViewport(1)
+    pushViewport(vp2)
+    cols = I(c(orfcols[which.min(orfscores)],orfcols[which.max(orfscores)]))
+    grid.draw(lemon::g_legend(qplot(x=1:2,y=1:2,color=range(orfscores,na.rm=T))+
+    scale_color_gradient(name='Normalized ORF Expr\n(ORFs_pM)',
+        breaks = setNames(sort(na.omit(orfscores)),floor(na.omit(sort(orfscores)))%>% format(big.mark=",",scientific=FALSE) ),
+        low=cols[1],high=cols[2])+theme(text=element_text(size=14),legend.key.size=unit(.5,'inches'))
+    ))
+    popViewport(1)
+    pushViewport(vp3)
+    dev.off()
+    normalizePath(plotfile)
+    #return file name
+    return(plotfile)
+} 

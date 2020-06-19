@@ -29,6 +29,10 @@ Depends:
     reshape2,
     rmarkdown,
     rtracklayer
+Suggests:
+    dplyr,
+    lemon,
+    Gviz
 Authors: c(person("Lorenzo", "Calviello", email =
     "calviello.l.bio@gmail.com", role = c("aut","cre")), person("Uwe",
     "Ohler", email = "Uwe.Ohler@mdc-berlin.de", role = c("rev","fnd")))
