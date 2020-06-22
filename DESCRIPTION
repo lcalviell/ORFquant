@@ -1,12 +1,19 @@
 Package: ORFquant
 Title: Splice-Aware Translatome Annotation
-Version: 1.01.0
+Version: 1.02.0
 Authors@R: 
-    person(given = "First",
-           family = "Last",
-           role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+    c(person(given = "Lorenzo",
+             family = "Calviello",
+             role = c("aut", "cre"),
+             email = "calviello.l.bio@gmail.com"),
+      person(given = "Uwe",
+             family = "Ohler",
+             role = c("rev", "fnd"),
+             email = "Uwe.Ohler@mdc-berlin.de"),
+      person(given = "Dermott",
+             family = "Harnett",
+             role = "ctb",
+             email = "Dermot.Harnett@mdc-berlin.de"))
 Description: ORFquant is a method that annotates and quantifies
     translation at the single ORF level using Ribo-seq data.
 License: GPL-3 or above
@@ -29,13 +36,6 @@ Depends:
     reshape2,
     rmarkdown,
     rtracklayer
-Suggests:
-    dplyr,
-    lemon,
-    Gviz
-Authors: c(person("Lorenzo", "Calviello", email =
-    "calviello.l.bio@gmail.com", role = c("aut","cre")), person("Uwe",
-    "Ohler", email = "Uwe.Ohler@mdc-berlin.de", role = c("rev","fnd")))
 biocViews: RiboSeq, GenomeAnnotation, Transcriptomics, Software
 Encoding: UTF-8
 LazyData: FALSE
