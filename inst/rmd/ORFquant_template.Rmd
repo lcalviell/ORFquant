@@ -177,7 +177,7 @@ for (i in c(1:length(rdata_list))){
 ```
 
 
-## 2.4 P-sites per Nucleotide per Million {.tabset}
+## 2.4 ORFs per Million {.tabset}
 
 ```{r norf_4, echo=FALSE, warning=FALSE, message=FALSE, results="asis", fig.width=10, dpi=150}
 # plot distribution for each sample in separate tabs
@@ -239,5 +239,19 @@ for (i in c(1:length(rdata_list))){
 }
 ```
 
+## 3.5 Alternative splice site profiles {.tabset}
 
+Optional, available if coverage files were provided: aggregate plot of Ribo-seq coverage (normalized 0-1 per each region) and ORF coverage over candidate alternative splice sites regions.\ No mixture indicates one ORF only, while other tracks indicate the presence of additional ORFs, divided by their summed translation values. Explanatory scheme at the bottom, with blue representing the major ORF and red the additional ORFs. Only regions with enough signal and separation from the major ORF are shown.
+
+```{r orfg_5, echo=FALSE, warning=FALSE, message=FALSE, results="asis", fig.width=27,fig.height=16,dpi=300}
+# plot distribution for each sample in separate tabs
+for (i in c(1:length(rdata_list))){
+    cat("### ", names(rdata_list)[i], " {.tabset} \n \n")
+    aaa<-rdata_list[[i]][["Meta_splicing_coverage"]]
+    if(length(aaa)>0){
+        print(aaa)
+    }
+    cat("\n\n")
+}
+```
 
