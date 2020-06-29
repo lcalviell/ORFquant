@@ -18,6 +18,10 @@ More details can be found in our manuscript:
 
 https://www.biorxiv.org/content/10.1101/608794v2
 
+Now published in Nature Structural and Molecular Biology:
+
+https://www.nature.com/articles/s41594-020-0450-4
+
 We recommend users to have a look at the vignette: https://htmlpreview.github.io/?https://github.com/lcalviell/ORFquant/blob/master/ORFquant_vignette.html, or our manual (*ORFquant_manual.pdf*).
 
 
