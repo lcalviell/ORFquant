@@ -3998,15 +3998,22 @@ get_ps_fromsplicemin<-function(x,cutoff){
 #' @param path_to_P_sites_uniq_mm_plus_bw (Optional) path to a bigwig file containing uniquely mapping (with mismatches) P_sites positions on the plus strand
 #' @param path_to_P_sites_uniq_mm_minus_bw (Optional) path to a bigwig file containing uniquely mapping (with mismatches) P_sites positions on the minus strand
 #' @param dest_name prefix to use for the output files. Defaults to same as \code{bam_file} (appends "for_ORFquant" to its filename)
+#' @param cores the number of cores to use, ignored for Windows. Defaults to \code{NA}
 #' @seealso \code{\link{run_ORFquant}}
 #' @export
 
 prepare_for_ORFquant<-function(annotation_file,bam_file,path_to_rl_cutoff_file=NA,chunk_size=5000000,path_to_P_sites_plus_bw=NA,
                                path_to_P_sites_minus_bw=NA,path_to_P_sites_uniq_plus_bw=NA,path_to_P_sites_uniq_minus_bw=NA,
                                path_to_P_sites_uniq_mm_plus_bw=NA,path_to_P_sites_uniq_mm_minus_bw=NA,
-                               dest_name=NA){
+                               dest_name=NA, cores=NA){
     
     load_annotation(annotation_file)
+
+	if (!is.na(cores)) {
+		register(MulticoreParam(cores))
+		parallel = T
+	}
+
     
     if(is.na(dest_name)){dest_name=bam_file}
     
@@ -4596,7 +4603,7 @@ prepare_for_ORFquant<-function(annotation_file,bam_file,path_to_rl_cutoff_file=N
     
     cat(paste("Calculating P-sites positions and junctions ...", date(),"\n"))
     
-    for_ORFquant<-reduceByYield(X=opts,YIELD=yiel,MAP=mapp,REDUCE=reduc)
+    for_ORFquant<-reduceByYield(X=opts,YIELD=yiel,MAP=mapp,REDUCE=reduc, parallel=T)
     
     if(length(for_ORFquant$P_sites_all)>0){
         merged_all_ps<-unlist(for_ORFquant$P_sites_all)
