@@ -4009,10 +4009,10 @@ prepare_for_ORFquant<-function(annotation_file,bam_file,path_to_rl_cutoff_file=N
     
     load_annotation(annotation_file)
 
-	if (!is.na(cores)) {
-		register(MulticoreParam(cores))
-		parallel = T
-	}
+    if (!is.na(cores)) {
+        register(MulticoreParam(cores))
+        parallel = T
+    }
 
     
     if(is.na(dest_name)){dest_name=bam_file}
