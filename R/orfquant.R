@@ -4009,6 +4009,7 @@ prepare_for_ORFquant<-function(annotation_file,bam_file,path_to_rl_cutoff_file=N
     
     load_annotation(annotation_file)
 
+    parallel = F
     if (!is.na(cores)) {
         register(MulticoreParam(cores))
         parallel = T
