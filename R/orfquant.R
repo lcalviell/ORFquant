@@ -4603,7 +4603,7 @@ prepare_for_ORFquant<-function(annotation_file,bam_file,path_to_rl_cutoff_file=N
     
     cat(paste("Calculating P-sites positions and junctions ...", date(),"\n"))
     
-    for_ORFquant<-reduceByYield(X=opts,YIELD=yiel,MAP=mapp,REDUCE=reduc, parallel=T)
+    for_ORFquant<-reduceByYield(X=opts,YIELD=yiel,MAP=mapp,REDUCE=reduc, parallel=parallel)
     
     if(length(for_ORFquant$P_sites_all)>0){
         merged_all_ps<-unlist(for_ORFquant$P_sites_all)
