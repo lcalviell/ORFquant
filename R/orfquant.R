@@ -3537,7 +3537,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file=NULL,gtf_fil
     
     cat(paste("Installing the BSgenome package ... ",date(),"\n",sep = ""))
     
-    install(paste(annotation_directory,pkgnm,sep="/"),upgrade = F)
+    install(paste(annotation_directory,pkgnm,sep="/"),upgrade = F,library=.libPaths()[1],lib=.libPaths()[1])
     cat(paste("Installing the BSgenome package --- Done! ",date(),"\n",sep = ""))
     
     
