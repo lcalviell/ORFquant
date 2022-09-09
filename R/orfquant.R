@@ -1212,8 +1212,9 @@ select_quantify_ORFs<-function(results_ORFs,P_sites,P_sites_uniq,cutoff_cums=NA,
   #disjointExons(orfann)
   
   
-  exbin<-disjointExons(orfann)
-  
+  # exbin<-disjointExons(orfann)
+  exbin<-exonicParts(orfann,linked.to.single.gene.only = T) #disjointExons is deprecated, so use exonicParts instead and mimic back to the disjoint format
+  mcols(exbin) <- mcols(exbin)[,c(3,2,7)] 
   
   d<-rep(0,length(exbin))
   
@@ -3536,7 +3537,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file=NULL,gtf_fil
     
     cat(paste("Installing the BSgenome package ... ",date(),"\n",sep = ""))
     
-    install(paste(annotation_directory,pkgnm,sep="/"),upgrade = F)
+    install(paste(annotation_directory,pkgnm,sep="/"),upgrade = F,library=.libPaths()[1],lib=.libPaths()[1])
     cat(paste("Installing the BSgenome package --- Done! ",date(),"\n",sep = ""))
     
     
@@ -3616,7 +3617,10 @@ prepare_annotation_files<-function(annotation_directory,twobit_file=NULL,gtf_fil
     
     
     #define exonic bins, including regions overlapping multiple genes
-    nsns<-disjointExons(annotation,aggregateGenes=T)
+    
+    #nsns<-disjointExons(annotation,aggregateGenes=T)
+    nsns<-exonicParts(annotation, linked.to.single.gene.only=F)
+    mcols(nsns) <- DataFrame(mcols(nsns)[c(3,2)],exonic_part=NA) #disjointExons is deprecated, so use exonicParts instead and mimic back to the disjoint format
     
     
     

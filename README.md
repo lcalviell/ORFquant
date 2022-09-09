@@ -29,7 +29,7 @@ To install *ORFquant*:
 
 ```
 library("devtools")
-install_github(repo = "lcalviell/ORFquant")
+install_github(repo = "Tim-Yu/ORFquant") # until they merge
 
 library("ORFquant")
 
