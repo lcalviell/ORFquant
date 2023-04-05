@@ -673,6 +673,7 @@ select_txs<-function(region,annotation,P_sites,P_sites_uniq,junction_counts,uniq
     genbin$unique_reads<-d
     
   }
+  mcols(genbin)<-mcols(genbin)[,c("tx_name","gene_id","type","reads","unique_reads")]
   mcols(gene_feat)<-mcols(gene_feat)[,names(mcols(genbin))]
   
   gene_feat<-sort(c(gene_feat,genbin))
@@ -1212,7 +1213,7 @@ select_quantify_ORFs<-function(results_ORFs,P_sites,P_sites_uniq,cutoff_cums=NA,
   #disjointExons(orfann)
   
   
-  exbin<-disjointExons(orfann)
+  exbin<-exonicParts(orfann,linked.to.single.gene.only = F)
   
   
   d<-rep(0,length(exbin))
@@ -2559,7 +2560,7 @@ annotate_ORFs<-function(results_ORFs,Annotation,genome_sequence,region,genetic_c
   
   ORFs_tx<-results_ORFs$ORFs_tx_position
   ORFs_gen<-results_ORFs$ORFs_genomic_position
-
+  
   orfssss_tx<-unlist(GRangesList(ORFs_tx))
   orfssss_tx<-orfssss_tx[!is.na(orfssss_tx$ORF_pct_P_sites)]
   maxORF_orf<-c()
@@ -3616,7 +3617,7 @@ prepare_annotation_files<-function(annotation_directory,twobit_file=NULL,gtf_fil
     
     
     #define exonic bins, including regions overlapping multiple genes
-    nsns<-disjointExons(annotation,aggregateGenes=T)
+    nsns<-exonicParts(annotation,linked.to.single.gene.only = F)
     
     
     
