@@ -3247,8 +3247,25 @@ run_ORFquant<-function(for_ORFquant_file,annotation_file,n_cores,prefix=for_ORFq
   
   ORFs_found<-ORFs_found[lens>1]
   if(length(ORFs_found)==0){stop(paste("No ORFs found! Please check sub-codon of Ribo-seq reads or that the annotation is correct --- ",date(),"\n"))}
-  ORFs_tx<-unlist(GRangesList(unlist(sapply(ORFs_found,function(x){unlist(x$ORFs_tx_position)}))))
+
+  #ORFs_tx<-unlist(GRangesList(unlist(sapply(ORFs_found,function(x){unlist(x$ORFs_tx_position)}))))
   
+  chunks<-seq(1,length(ORFs_found),by = 1000)
+  if(chunks[length(chunks)]<length(ORFs_found)){chunks<-c(chunks,length(ORFs_found))}
+  ORFs_tx<-GRangesList()
+  for(i in 1:(length(chunks)-1)){
+  
+    if(i!=(length(chunks)-1)){
+    ao<-unlist(GRangesList(unlist(sapply(ORFs_found[chunks[i]:(chunks[i+1]-1)],function(x){unlist(x$ORFs_tx_position)}))))
+    ORFs_tx[[i]]<-ao
+  }
+  if(i==(length(chunks)-1)){
+    ORFs_tx[[i]]<-unlist(GRangesList(unlist(sapply(ORFs_found[chunks[i]:(chunks[i+1])],function(x){unlist(x$ORFs_tx_position)}))))
+  }
+  }
+
+  ORFs_tx<-unlist(ORFs_tx)
+
   ORFs_feat<-unlist(sapply(ORFs_found,function(x){unlist(x$selected_ORFs_features)}))
   ORFs_feat<-GRangesList(sapply(ORFs_feat,function(x){
     x$X$tx_name<-NULL
